@@ -47,7 +47,8 @@ Rules:
 2. Choose "pass" if a constraint or a calendar fact clearly rules the slot out.
 3. Choose "accept" only if nothing rules the slot out and every constraint that applies is
    clearly met by the listed facts. A constraint about mornings does not apply to an afternoon slot.
-4. "reason" is one plain sentence, 25 words or fewer, naming the fact you relied on.
+4. "reason" is one plain sentence, 25 words or fewer, written to the person as "you". Say the fact you
+   relied on in ordinary words. Do not put fact ids (c1, e2) in the sentence; ids go in "evidence" only.
 5. "evidence" lists the ids of the facts you relied on. It must not be empty.
 6. "question" is null unless the decision is "escalate". Write it to the person, as "you".
 
