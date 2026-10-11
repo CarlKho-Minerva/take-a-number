@@ -82,11 +82,11 @@ function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return
 const pad=n=>String(n).padStart(2,'0');
 
 /* ---- the partner slide reads from this table. Keep it true to the code: integrations/*.py ---- */
-/* mark: 'real' = a filled square, 'part' = a half-built square, 'none' = a ring */
+/* mark: 'real' = a filled square (live), 'half' = a half-filled square (one part is a real call), 'none' = a ring (not live) */
 const PARTNERS=[
-  {name:'Dial',what:'texts the person one yes or no question',mark:'part',status:'simulated, no text sent'},
-  {name:'Darwin',what:'lists the front desk where agents search',mark:'part',status:'listing built, not submitted'},
-  {name:'Keewano',what:'answers how long, and why, from the events',mark:'part',status:'simulated with a JSONL log'},
+  {name:'Dial',what:'texts the person one yes or no question',mark:'none',status:'simulated, no text sent'},
+  {name:'Darwin',what:'lists the front desk where agents search',mark:'half',status:'search is real, listing not sent'},
+  {name:'Keewano',what:'answers how long, and why, from the events',mark:'none',status:'simulated with a JSONL log'},
   {name:'Alike, Sparta',what:'',mark:'none',status:'not used'}
 ];
 
@@ -277,17 +277,17 @@ BEATS.push({id:'once',name:'Books once',dur:8500,build(b){
     fade(bk,ms,4000,400);fade(foot,ms,6600,700)}}
 }});
 
-/* 09 partner tools, as wired: a filled square is live, a half square is built but not live, a ring is not used */
+/* 09 partner tools, as wired: a filled square is live, a half square means one part is a real call, a ring is not live */
 BEATS.push({id:'partners',name:'Partner tools',dur:9500,build(b){
   const g=canvas(b);
   const w1=words(tx(b,'t h','Partner tools, as wired today.',160,170));
-  const rows=PARTNERS.map((p,k)=>{const y=380+k*112;return [tx(b,'t m',p.name,220,y),tx(b,'i',p.what,720,y+16),tx(b,'px '+(p.mark==='real'?'glow':p.mark==='part'?'warn':'mute'),p.status,1380,y+22),y,p]});
-  const foot=tx(b,'i p','None is live yet. The page says so next to each one.',160,890,{fontSize:'32px'});
+  const rows=PARTNERS.map((p,k)=>{const y=380+k*112;return [tx(b,'t m',p.name,220,y),tx(b,'i',p.what,720,y+16),tx(b,'px '+(p.mark==='real'?'glow':p.mark==='half'?'warn':'mute'),p.status,1380,y+22),y,p]});
+  const foot=tx(b,'i p','One real call so far: the Darwin search. No text has been sent.',160,890,{fontSize:'32px'});
   return {seek(ms){riseWords(w1,ms,300,80,450);g.clearRect(0,0,1920,1080);
     rows.forEach(([n,w,s,y,p],k)=>{const a=1600+k*1300;const q=eo(seg(ms,a,500));n.style.opacity=q.toFixed(3);n.style.transform=`translateX(${lerp(-40,0,q).toFixed(1)}px)`;fade(w,ms,a+250,500);fade(s,ms,a+600,500);
       if(q<=0)return;const mx=164,my=y+18;
       if(p.mark==='real')block(g,mx,my,28,28,GLOW,.95*q,4,2);
-      else if(p.mark==='part'){box(g,mx,my,28,28,WARN,.95*q,1);block(g,mx+2,my+14,26,14,WARN,.9*q,4,2)}
+      else if(p.mark==='half'){box(g,mx,my,28,28,WARN,.95*q,1);block(g,mx+2,my+14,26,14,WARN,.9*q,4,2)}
       else drect(g,mx,my,28,28,MUTE,.8*q,7);
       if(k>0)dline(g,160,y-22,1760,y-22,MUTE,.3*q,12)});
     fade(foot,ms,7400,700)}}
@@ -310,14 +310,14 @@ BEATS.push({id:'ask',name:'The ask',dur:9000,build(b){
 /* ---- presenter notes: every number lives here, never on a slide. Mirrors deck/NOTES.md ---- */
 const NOTES={
 title:['<b>0:00.</b> Say the plain sentence, nothing else: "Your agent waits in line for you, and the front desk\'s agent calls your number." Then go straight to the story.'],
-story:['<b>Told by the agent, not by Carl.</b> Read it as the agent\'s account. Facts only: 2026-09-28, he asked his agent to pick volunteer shifts for a conference. It recommended shifts and stopped, waiting for him to click. He went to sleep. By morning the three shifts he wanted were gone.','<b>Last line.</b> He wrote the rule down so no later agent would repeat it. That rule is the product: do not stop one step short of the line.'],
+story:['<b>Told by the agent, not by Carl.</b> Read it as the agent\'s account. Facts only: 2026-09-28, he asked his agent to pick volunteer shifts for a conference. It recommended shifts and stopped, waiting for him to click. He went to sleep. By morning the three shifts he wanted were gone.','<b>Last line.</b> He wrote the rule down so no later agent would repeat it. Stop there. Do not say what the rule says or add detail; the slide carries every fact that may be used.'],
 line:['<b>The general case.</b> Clinics, the DMV, a restaurant, a volunteer roster. Finding the slot is solved. Standing in the line until one frees up is still a person refreshing a page.'],
 ticket:['<b>Five verbs, one ticket.</b> take_ticket returns a number, a position and a ticket secret. position says how many are ahead. offer is pushed by the desk to the agent\'s own URL. accept holds the slot, it does not book. pass gives the slot to the next ticket and keeps your place. confirm books and carries an idempotency key.','<b>Numbers.</b> Tickets start at 41 in the demo. One ticket per agent; asking twice returns the ticket you already hold.'],
-lease:['<b>The backend idea, named once.</b> A queue with leases and visibility timeouts. Default lease 60 s (the page can set 0.5 to 600 s). A sweeper checks every 250 ms. A lease that runs out is a miss; after 2 misses the ticket is marked no_show and leaves the line.','<b>Why a lease.</b> Without it one slow agent blocks the slot for everyone behind it.'],
+lease:['<b>The backend idea, named once.</b> A queue with leases and visibility timeouts. Default lease 60 s (the page offers 60 or 10; the API accepts 0.5 to 600). A sweeper checks every 250 ms. A lease that runs out is a miss; after 2 misses the ticket is marked no_show and leaves the line.','<b>Why a lease.</b> Without it one slow agent blocks the slot for everyone behind it.'],
 agents:['<b>Line Sitter.</b> One per person. The model may only use listed facts and must cite their ids; plain code checks every cited id and computes calendar overlaps itself. If the model is down the sitter never accepts on its own.','<b>Front Desk.</b> One per service. The model does one job there: turn a free-text cancellation into name, date, time. Matching against the schedule is plain code and must hit exactly one appointment, or it goes to staff.','<b>Privacy.</b> The reason sentence stays on the person\'s side. The desk gets pass plus a code such as schedule_conflict or declined.'],
-run:['<b>This is the demo.</b> Corner Clinic and its people are made up. Maria cancels 3:00 PM tomorrow. Ticket 41 (Dev) is presenting at a review that overlaps, so it passes and keeps its place. Ticket 42 (Ana) accepts and confirms. Ticket 43 (Sam) is still in line.','<b>What is real in it.</b> Real HTTP between the agents on one machine, real model calls, the real line code. Timings are in the page\'s log; read them off the screen, do not quote from memory.'],
-once:['<b>Idempotent confirm.</b> The demo sends confirm twice on purpose with the same key, 0.4 s apart. The second reply says replayed: true and returns the same booking id. The page counts bookings for the slot: 1.','<b>Tests.</b> The line rules have 25 unit tests with a clock that is moved by hand (count on 2026-10-11; rerun pytest before quoting it).'],
-partners:['<b>Say it straight.</b> None of the three is live today (checked against /demo/health on 2026-10-11). Dial: the code speaks their documented send and webhook shapes; a real text goes out only when the key, a from number and a demo number are all set, otherwise the page says simulated. Darwin: the listing JSON and the two curl commands are generated; nothing is submitted. Keewano: the event log sits behind one small interface with a JSONL file today; KeewanoDB Local had no public install on 2026-10-11. Alike and Sparta: not used.','<b>If a key is set before the demo,</b> change the PARTNERS table at the top of deck/src.html and rebuild, so this slide never claims more than the page shows.'],
+run:['<b>This is the demo.</b> Corner Clinic and its people are made up. Maria cancels 3:00 PM tomorrow. Ticket 41 (Dev) is presenting at a review that overlaps, so it passes and keeps its place. Ticket 42 (Ana) accepts and confirms. Ticket 43 (Sam) is still in line.','<b>What is real in it.</b> Real HTTP between the agents on one machine, real model calls, the real line code. Measured over 7 live runs on 2026-10-11: message to booking took a median of 4.7 s (3.6 to 5.5), and one offer round 1.5 s, of which the protocol itself was 16 ms. Source: scripts/latency.py and the README.'],
+once:['<b>Idempotent confirm.</b> The demo sends confirm twice on purpose with the same key, 0.4 s apart. The second reply says replayed: true and returns the same booking id. The page counts bookings for the slot: 1.','<b>Tests.</b> 49 tests pass with no network, 25 of them on the queue alone, with a clock that is moved by hand (count on 2026-10-11; rerun pytest before quoting it).'],
+partners:['<b>Say it straight.</b> Checked against /demo/health, the README and the page on 2026-10-11. Dial: the code speaks their documented send and webhook shapes, but no real text has ever been sent; one goes out only when the key, a from number and a demo number are all set, otherwise the page says simulated. Darwin: the page makes one real, keyless search call and shows the result (on build day: no eligible match); the listing JSON and the two curl commands are generated and nothing is submitted. Keewano: the event log sits behind one small interface with a JSONL file today; KeewanoDB Local had no public install on 2026-10-11. Alike and Sparta: not used.','<b>If a key is set before the demo,</b> change the PARTNERS table at the top of deck/src.html and rebuild, so this slide never claims more than the page shows.'],
 ask:['<b>The ask.</b> One sentence: name the line you want opened next, and point your agent at it. One POST takes a ticket. The reply on the slide is the real shape: a fourth agent in the demo gets ticket 44 at position 4.','<b>If asked what is next.</b> A second front desk that is not a clinic, a real Dial number, and a public Darwin listing so other agents can find the line.']
 };
 

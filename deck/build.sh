@@ -4,7 +4,11 @@
 set -eu
 cd "$(dirname "$0")"
 KIT=/Users/carl/CODELocalProjects/lifeos/design/kit.py
-PW=${PW:-/Users/carl/CODELocalProjects/hyderabaddies/deck/video/pw/bin/python}
+PW=${PW:-python3}
+if ! "$PW" -c "import playwright" 2>/dev/null; then
+  echo "FAIL: $PW cannot import playwright. Run again as: PW=/path/to/venv/bin/python deck/build.sh" >&2
+  exit 1
+fi
 python3 - <<'PY'
 import re, subprocess, pathlib, sys, tempfile
 js = re.findall(r'<script>(.*?)</script>', pathlib.Path('src.html').read_text(), flags=re.S)[-1]

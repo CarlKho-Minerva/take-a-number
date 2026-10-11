@@ -1,3 +1,5 @@
 # scratch from the video render
 video/_frames/
 video/_work/
+# per-slide screenshots, remade by build.sh
+shots/

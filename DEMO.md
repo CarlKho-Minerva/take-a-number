@@ -4,7 +4,7 @@
 
 Your agent waits in line for you, and the front desk's agent calls your number. Underneath it is a queue with leases and visibility timeouts, spoken agent to agent.
 
-Everything below runs on one laptop. The clinic (Corner Clinic), its schedule and the three people in line (Dev, Ana, Sam) are invented fixtures. What runs live: the line itself (tickets, leased offers, pass, confirm with an idempotency key), real HTTP between the Front Desk agent and three Line Sitter agents on the loopback socket, and real model calls for the two jobs the model has. What is simulated today: the text message to the person (Dial), the directory listing (Darwin) and the sequence database (Keewano). The page says "simulated" next to each one. Say that first.
+Everything below runs on one laptop. The clinic (Corner Clinic), its schedule and the three people in line (Dev, Ana, Sam) are invented fixtures. What runs live: the line itself (tickets, leased offers, pass, confirm with an idempotency key), real HTTP between the Front Desk agent and three Line Sitter agents on the loopback socket, and real model calls for the two jobs the model has. What is simulated today: the text message to the person (Dial) and the sequence database (Keewano). Darwin is half real: the page makes one real, keyless search call to Darwin's directory, and the listing that would make this front desk findable is generated but not published. The page prints each status. Say that first.
 
 ## Before you walk up (5 minutes)
 
@@ -40,7 +40,7 @@ Start on tab A. The words are a draft; the clicks and the screen text are what t
 | 2:00 | do not answer for Dev. Let the dots drain | "It asks its person one yes or no question. I am not going to answer. Ten seconds." | Lease dots drain on card 41. Then **Ticket 41's lease ran out. Next ticket.** Card 41: `missed 1 of 2, kept position 1` |
 | 2:12 | on card 42 press **No** within the ten seconds | "Ana's agent asks too. She says no. She keeps her place." | **Ana says no.** Card 42: `passed, kept position 2` |
 | 2:20 | nothing | "Sam wrote 'any time of day works.' His agent takes it without asking anyone." | **Ticket 43 has the 9:30 AM slot.** with the seconds it took, then **The retry got the same booking back. Still 1.** |
-| 2:28 | scroll to **Asked of the event log** and **Partner tools in this run** | "Every event goes to a log, and the page answers 'how long, and why' from it. Partner tools: Dial sends that question as a real text, Darwin lists this desk so agents can find it, Keewano holds the log. Today the page marks all three simulated." | Two plain sentences read back from the log, with event numbers. Three partner rows, each with its status |
+| 2:28 | scroll to **Asked of the event log** and **Partner tools in this run** | "Every event goes to a log, and the page answers 'how long, and why' from it. Partner tools, as they stand: the Darwin search on this page is a real call. The Dial text and the Keewano log are simulated today, and the page says so." | Two plain sentences read back from the log, with event numbers. Three partner rows: Dial `simulated, no text sent`, Darwin `search is a real call, listing not submitted`, Keewano `simulated with a JSONL log` |
 | 2:42 | tab B, press `End` | "Point your agent at a front desk. One POST takes a ticket. Tell me which line you want opened next." | Slide 10: **Point your agent at a front desk.** `POST /desk/a2a/take_ticket` types itself out |
 | 3:00 | stop | | |
 
@@ -56,7 +56,7 @@ Tab A only until the last line. Lease stays on 60 s.
 | 0:06 | **Maria cancels 3:00 PM** | "A patient cancels by text. The clinic's agent frees the slot and offers it to ticket 41, held for sixty seconds." | **3:00 PM is free. Offering it down the line.** then **Ticket 41 has 60 seconds to answer.** |
 | 0:18 | nothing | "41 is presenting then, so it passes and keeps its place. 42 accepts and confirms." | **Ticket 41 passes and keeps its place.** then **Ticket 42 has the 3:00 PM slot.** |
 | 0:30 | point at the last wire row | "It confirmed twice on purpose. One booking. That is the backend idea: a queue with leases and visibility timeouts, spoken agent to agent." | **The retry got the same booking back. Still 1.** |
-| 0:42 | nothing | "The clinic and the people are made up. The line, the messages and the model calls are real. The partner tools are marked simulated today." | Footer and the **Partner tools in this run** rows |
+| 0:42 | nothing | "The clinic and the people are made up. The line, the messages and the model calls are real. Of the partner tools, only the Darwin search is a live call today." | Footer and the **Partner tools in this run** rows |
 | 0:52 | tab B, press `End` | "Point your agent at a front desk. One POST takes a ticket. Tell me which line to open next." | Slide 10 |
 | 1:00 | stop | | |
 
@@ -66,9 +66,11 @@ The agents run on this laptop, so the page stays up. Only the model calls need t
 
 Say (DRAFTED FOR CARL): "The Wi-Fi just dropped, so I am switching to a recording of a real run from this morning. Same page, same events, no network."
 
-Then press **Replay** in the header. The status line changes to `replay of a recorded run`, and three buttons appear: **Maria cancels 3:00 PM**, **Tom cancels 9:30 AM (agents must ask)**, **Nobody answers: the lease runs out**. Press the first for the 0:08 beat and the third for the 1:45 beat. In Replay the Yes and No buttons are disabled and show what was answered in the recording, marked `(recorded)`. Do not claim a Replay run is live.
+Then press **Replay** in the header. (Without Wi-Fi the Darwin row in Live reads `search not reached`; in Replay it shows the search recorded this morning, marked `Recorded`.)
 
-If you pressed a Live button before noticing: the headline reads **The desk could not act on that. Staff get it.** and the Front desk box says the model did not answer. That is the designed behaviour, not a crash: the desk does not guess. It can take up to 24 seconds to appear (three model providers, 8 seconds each). Say so, then press **Replay**.
+The status line changes to `replay of a recorded run`, and three buttons appear: **Maria cancels 3:00 PM**, **Tom cancels 9:30 AM (agents must ask)**, **Nobody answers: the lease runs out**. Press the first for the 0:08 beat and the third for the 1:45 beat. In Replay the Yes and No buttons are disabled and show what was answered in the recording, marked `(recorded)`. Do not claim a Replay run is live.
+
+If you pressed a Live button before noticing: the headline reads **The desk could not act on that. Staff get it.** and the Front desk box says the model did not answer. That is the designed behaviour, not a crash: the desk does not guess. It can take up to about 24 seconds to appear (three model providers, 8 seconds each). Say so, then press **Replay**.
 
 ## If something breaks
 
@@ -87,10 +89,10 @@ Three questions a founder who builds agent products is likely to ask. Answers ar
 No. A booking app owns both sides. This is the wire between two agents that have never met: an agent card, five verbs, and a lease so one slow agent cannot hold a slot hostage. The clinic keeps its own schedule and only has to run the line. The demo page is the consumer face; the protocol is the product.
 
 **"What does the model do, and what happens when it is wrong or down?"**
-It does two jobs. At the desk it turns a free-text cancellation into a name, a date and a time; plain code then has to match exactly one appointment, or the message goes to staff. For the person it judges an offer against their written rules, and it must cite the facts it used; code checks every citation and computes calendar overlaps itself, so a model cannot accept over a conflict. If the model is down the agent never accepts on its own: a hard overlap becomes a pass, anything else becomes a question for the person. There is a `model outage (simulated)` checkbox on the page to show it.
+It does two jobs. At the desk it turns a free-text cancellation into a name, a date and a time; plain code then has to match exactly one appointment, or the message goes to staff. For the person it judges an offer against their written rules, and it must cite the facts it used; code checks every citation and computes calendar overlaps itself, so a model cannot accept over a conflict. If the model is down the agent never accepts on its own: a hard overlap becomes a pass, anything else becomes a question for the person. There is a `sitter model outage (simulated)` checkbox on the page to show the person's side of it.
 
 **"What is real and what is simulated?"**
-Real: the line rules (unit tests with a clock moved by hand), HTTP between the agents on one machine, the model calls, the idempotent confirm. Invented: the clinic, the schedule, the three people. Simulated today: the text to the person (the Dial adapter is written to their documented API and sends only when a key and two numbers are set), the Darwin listing (the file and the commands are generated, nothing is submitted), and Keewano (the event log is a JSONL file behind one small interface). Not built: identity. Today a ticket is tied to an agent URL and a ticket secret, and nothing proves who is behind the URL.
+Real: the line rules (49 tests, with a clock moved by hand), HTTP between the agents on one machine, the model calls, the idempotent confirm, and one keyless search call to Darwin. Invented: the clinic, the schedule, the three people. Simulated today: the text to the person (the Dial adapter is written to their documented API, has never sent a real text, and sends only when a key and two numbers are set) and Keewano (the event log is a JSONL file behind one small interface). Not done: the Darwin listing is generated but not published. Not built: identity. A ticket is tied to an agent URL and a ticket secret, and nothing proves who is behind the URL.
 
 ## For the technical judge
 
@@ -100,7 +102,8 @@ curl -s localhost:8041/sitters/ana/.well-known/agent-card.json # one line sitter
 curl -s -X POST localhost:8041/desk/a2a/take_ticket -H 'Content-Type: application/json' \
   -d '{"agent_url":"http://127.0.0.1:9999/me","label":"judge"}'  # your own ticket: number, position, ticket_secret, lease_seconds
 curl -s localhost:8041/demo/line                                # the whole line: tickets, slots, offers, bookings
-uv run pytest -q                                                # the line rules, with a clock moved by hand
+curl -s localhost:8041/demo/darwin/search                       # one real, keyless search of Darwin's directory
+uv run pytest -q                                                # 49 tests, no network; the line rules use a clock moved by hand
 ```
 
 A ticket taken with curl has no agent listening at its URL. When a slot reaches it the desk reports `could not reach ticket N's agent`, counts a miss, and moves on. That is the designed behaviour.

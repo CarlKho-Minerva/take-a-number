@@ -44,7 +44,7 @@ URL switches: `?autoplay=1` plays it through, `?print=1` stacks every slide for 
 | 6 | mechanism | Two agents. One line between them. | Two boxes draw themselves; messages run both ways | 9.5 | "One agent per person, one per service. The desk hears pass and a code. It never sees the calendar." |
 | 7 | proof | Maria cancels. The line moves on its own. | The freed slot arcs to 41, which passes, then to 42, which books | 13 | "This is the run you just watched. Nobody refreshed a page. Nobody was put on hold." |
 | 8 | proof | It confirms twice. It books once. | Two confirms travel to the desk; one booking square lights, once | 8.5 | "A retry with the same key gets the same booking back." |
-| 9 | proof | Partner tools, as wired today. | Four rows, each with a mark and a status | 9.5 | "None of the three is live yet, and the page says so. Dial is one key away." |
+| 9 | proof | Partner tools, as wired today. | Four rows, each with a mark and a status | 9.5 | "One real call so far, the Darwin search. The Dial text and the Keewano log are simulated, and the page says so." |
 | 10 | ask | Point your agent at a front desk. | One request types itself; the reply appears | 9 | "One POST takes a ticket. Tell me which line you want opened next." |
 
 Total as a self-playing cut: 99 seconds. In the 3-minute live demo only slides 2, 4, 5 and 10 are shown (see `DEMO.md`); the others are for questions and for the PDF.
@@ -71,22 +71,23 @@ The twelve squares and which ones empty first are a drawing, not data. Do not ad
 | How often expired leases are swept | every 0.25 s | `take_a_number/app.py` `_sweep_forever` |
 | Model timeout | 8 s per provider, up to three providers | `take_a_number/llm.py` |
 | Gap between the two confirms | 0.4 s, same idempotency key | `take_a_number/line_sitter.py` |
-| Maria run, message to booking | 3.2 s in the recording made 10:41 PDT; a live run differs, read it off the page | `docs/replay.json`, run `maria-3pm`, events 5 and 18 |
-| Model calls in that run | 3 (one at the desk, one per sitter that decided), each about 1 s, gemini-3.8-flash | same recording |
+| Maria run, message to booking | Median 4.7 s over 7 live runs (3.6 to 5.5 s). The shipped recording shows 3.8 s; a live run differs, read it off the page | README "Latency", `scripts/latency.py`; `docs/replay.json` run `maria-3pm`, events 5 and 18 |
+| One offer round | Median 1.5 s (1.1 to 1.9 s), of which the model call is 1.49 s and the protocol (two HTTP hops and the queue) 16 ms | README "Latency" |
+| Model calls in that run | 3 (one at the desk, one per sitter that decided), each a little over 1 s, gemini-3.8-flash | `docs/replay.json` |
 | Ticket 44, position 4 on slide 10 | The real reply a fourth agent gets after a reset | checked with curl against a local copy on 2026-10-11 |
-| Unit tests | Run `uv run pytest -q` and quote what it prints | `tests/` |
+| Tests | 49 pass with no network (25 on the queue alone), checked 2026-10-11. Run `uv run pytest -q` again before quoting | `tests/` |
 | "8.1 minutes per scheduling call" on the page | An assumption the page labels as one (Accenture, 2013). Do not quote it as a result | `docs/app.js` |
 
-If `docs/replay.json` is recorded again, the 3.2 s will change. Read the new number from the page before saying one.
+If `docs/replay.json` is recorded again, the 3.8 s will change. Read the new number from the page before saying one.
 
 ## Partner slide: keep it true
 
-Slide 9 reads from the `PARTNERS` table at the top of the script in `deck/src.html`. On 2026-10-11 `GET /demo/health` reported all three as simulated:
+Slide 9 reads from the `PARTNERS` table at the top of the script in `deck/src.html`. Checked on 2026-10-11 against `GET /demo/health`, the README and the page:
 
 | Tool | In the code | Live today |
 |---|---|---|
-| Dial | `integrations/dial.py`: sends one SMS and verifies inbound webhook signatures, written to their documented API | No. Needs `DIAL_API_KEY`, `DIAL_FROM_NUMBER`, `DEMO_TO_NUMBER`. Until then the page says "simulated, no text sent" |
-| Darwin | `integrations/darwin.py`: builds the listing from the front desk's agent card and prints the two curl commands | No. Nothing is submitted by the code; publishing is left to a person |
+| Dial | `integrations/dial.py`: sends one SMS and verifies inbound webhook signatures, written to their documented API | No. No real text has ever been sent. Needs `DIAL_API_KEY`, `DIAL_FROM_NUMBER`, `DEMO_TO_NUMBER`. Until then the page says "simulated, no text sent" |
+| Darwin | `integrations/darwin.py`: one real, keyless search call shown on the page; builds the listing from the front desk's agent card and prints the two curl commands | Half. The search is a real call (on build day it returned no eligible match). The listing is not submitted; publishing is left to a person |
 | Keewano | `integrations/keewano.py`, `eventlog.py`: every event appended to a log behind one small interface; the "how long, and why" answer is read from it | No. The backend is a JSONL file |
 | Alike, Sparta | Not used | No |
 
@@ -99,4 +100,4 @@ deck/build.sh            # lint, inline, screenshots, PDF
 deck/build.sh --pdf-only # PDF only
 ```
 
-Needs the design kit at `/Users/carl/CODELocalProjects/lifeos/design/` and a Python with Playwright (path in `build.sh`, override with `PW=`). Headless only.
+Needs the design kit at `/Users/carl/CODELocalProjects/lifeos/design/` and a Python that has Playwright with its headless Chromium: `PW=/path/to/venv/bin/python deck/build.sh`. Without one the script stops and says so. Headless only.
