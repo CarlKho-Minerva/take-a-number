@@ -1,5 +1,5 @@
 {
- "recorded_at": "2026-10-11 10:49 PDT",
+ "recorded_at": "2026-10-11 11:01 PDT",
  "note": "Real LIVE runs: real HTTP between the agents on one machine, real model calls. Saved by scripts/record.py, not edited.",
  "darwin_search": {
   "tool": "Darwin",
@@ -162,7 +162,7 @@
     },
     {
      "seq": 2,
-     "t_ms": 14,
+     "t_ms": 17,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 41,
@@ -172,7 +172,7 @@
     },
     {
      "seq": 3,
-     "t_ms": 19,
+     "t_ms": 22,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 42,
@@ -182,7 +182,7 @@
     },
     {
      "seq": 4,
-     "t_ms": 22,
+     "t_ms": 26,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 43,
@@ -192,7 +192,7 @@
     },
     {
      "seq": 5,
-     "t_ms": 24,
+     "t_ms": 28,
      "type": "cancellation_received",
      "actor": "desk",
      "text": "hi this is Maria I can't make my 3pm tomorrow",
@@ -200,7 +200,7 @@
     },
     {
      "seq": 6,
-     "t_ms": 1292,
+     "t_ms": 2200,
      "type": "cancellation_parsed",
      "actor": "desk",
      "parsed": {
@@ -210,11 +210,11 @@
       "time": "15:00"
      },
      "model": "gemini-3.8-flash",
-     "ms": 1265
+     "ms": 2169
     },
     {
      "seq": 7,
-     "t_ms": 1292,
+     "t_ms": 2200,
      "type": "slot_freed",
      "actor": "desk",
      "slot": {
@@ -228,7 +228,7 @@
     },
     {
      "seq": 8,
-     "t_ms": 1292,
+     "t_ms": 2200,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 41",
@@ -245,7 +245,7 @@
     },
     {
      "seq": 9,
-     "t_ms": 1296,
+     "t_ms": 2204,
      "type": "deciding",
      "actor": "sitter:dev",
      "ticket": 41,
@@ -253,26 +253,27 @@
     },
     {
      "seq": 10,
-     "t_ms": 2518,
+     "t_ms": 3789,
      "type": "decision",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1",
      "decision": "pass",
-     "reason": "You have a presentation during the quarterly review that conflicts with this time.",
+     "reason": "You cannot take this slot because it conflicts with a meeting where you are presenting.",
      "evidence": [
       "c1",
+      "e1",
       "e2"
      ],
      "question": null,
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1219,
+     "ms": 1582,
      "detail": null
     },
     {
      "seq": 11,
-     "t_ms": 2524,
+     "t_ms": 3795,
      "type": "passed",
      "actor": "desk",
      "ticket": 41,
@@ -283,7 +284,7 @@
     },
     {
      "seq": 12,
-     "t_ms": 2524,
+     "t_ms": 3795,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 42",
@@ -300,7 +301,7 @@
     },
     {
      "seq": 13,
-     "t_ms": 2528,
+     "t_ms": 3799,
      "type": "wire",
      "actor": "sitter:dev",
      "to": "desk",
@@ -319,7 +320,7 @@
     },
     {
      "seq": 14,
-     "t_ms": 2528,
+     "t_ms": 3801,
      "type": "deciding",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -327,13 +328,13 @@
     },
     {
      "seq": 15,
-     "t_ms": 3818,
+     "t_ms": 6435,
      "type": "decision",
      "actor": "sitter:ana",
      "ticket": 42,
      "offer_id": "offer-2",
      "decision": "accept",
-     "reason": "The Monday afternoon slot fits your schedule and gives you 90 minutes of travel time, well over the 40 minutes needed.",
+     "reason": "The afternoon slot fits your schedule and gives you plenty of time to travel there after your lunch.",
      "evidence": [
       "c2",
       "e1",
@@ -342,12 +343,12 @@
      "question": null,
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1287,
+     "ms": 2631,
      "detail": null
     },
     {
      "seq": 16,
-     "t_ms": 3826,
+     "t_ms": 6443,
      "type": "held",
      "actor": "desk",
      "ticket": 42,
@@ -356,7 +357,7 @@
     },
     {
      "seq": 17,
-     "t_ms": 3826,
+     "t_ms": 6447,
      "type": "wire",
      "actor": "sitter:ana",
      "to": "desk",
@@ -374,7 +375,7 @@
     },
     {
      "seq": 18,
-     "t_ms": 3830,
+     "t_ms": 6456,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 42,
@@ -390,7 +391,7 @@
     },
     {
      "seq": 19,
-     "t_ms": 3831,
+     "t_ms": 6460,
      "type": "wire",
      "actor": "sitter:ana",
      "to": "desk",
@@ -412,7 +413,7 @@
     },
     {
      "seq": 20,
-     "t_ms": 4235,
+     "t_ms": 6866,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 42,
@@ -428,7 +429,7 @@
     },
     {
      "seq": 21,
-     "t_ms": 4235,
+     "t_ms": 6869,
      "type": "wire",
      "actor": "sitter:ana",
      "to": "desk",
@@ -455,8 +456,8 @@
     "events_read": 21,
     "served": {
      "ticket": 42,
-     "wait_s": 3.8,
-     "answer": "Ticket 42 waited 3.8 s in line, from taking the ticket (event 3) to the booking (event 18). The slot came free at event 7 and was booked 2.5 s later. Its own offer took 1.3 s from offer (event 12) to booking.",
+     "wait_s": 6.4,
+     "answer": "Ticket 42 waited 6.4 s in line, from taking the ticket (event 3) to the booking (event 18). The slot came free at event 7 and was booked 4.3 s later. Its own offer took 2.7 s from offer (event 12) to booking.",
      "evidence_seq": [
       3,
       7,
@@ -466,7 +467,7 @@
     },
     "passed": {
      "ticket": 41,
-     "answer": "Ticket 41 passed because: You have a presentation during the quarterly review that conflicts with this time. (event 10, decided by model). It kept its place (position 1).",
+     "answer": "Ticket 41 passed because: You cannot take this slot because it conflicts with a meeting where you are presenting. (event 10, decided by model). It kept its place (position 1).",
      "evidence_seq": [
       10,
       11
@@ -634,7 +635,7 @@
     },
     {
      "seq": 3,
-     "t_ms": 7,
+     "t_ms": 9,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 42,
@@ -644,7 +645,7 @@
     },
     {
      "seq": 4,
-     "t_ms": 13,
+     "t_ms": 17,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 43,
@@ -654,7 +655,7 @@
     },
     {
      "seq": 5,
-     "t_ms": 14,
+     "t_ms": 19,
      "type": "cancellation_received",
      "actor": "desk",
      "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
@@ -662,7 +663,7 @@
     },
     {
      "seq": 6,
-     "t_ms": 1206,
+     "t_ms": 2206,
      "type": "cancellation_parsed",
      "actor": "desk",
      "parsed": {
@@ -672,11 +673,11 @@
       "time": "09:30"
      },
      "model": "gemini-3.8-flash",
-     "ms": 1189
+     "ms": 2184
     },
     {
      "seq": 7,
-     "t_ms": 1206,
+     "t_ms": 2206,
      "type": "slot_freed",
      "actor": "desk",
      "slot": {
@@ -690,7 +691,7 @@
     },
     {
      "seq": 8,
-     "t_ms": 1206,
+     "t_ms": 2206,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 41",
@@ -707,7 +708,7 @@
     },
     {
      "seq": 9,
-     "t_ms": 1210,
+     "t_ms": 2210,
      "type": "deciding",
      "actor": "sitter:dev",
      "ticket": 41,
@@ -715,43 +716,43 @@
     },
     {
      "seq": 10,
-     "t_ms": 2910,
+     "t_ms": 4559,
      "type": "decision",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1",
      "decision": "escalate",
-     "reason": "The Monday 9:30 AM slot is before 10 AM, and it is unknown if your knee follow-up is urgent.",
+     "reason": "The offered slot is before 10 AM, and it is not specified whether your knee follow-up is urgent.",
      "evidence": [
       "c2",
       "e1",
       "t1"
      ],
-     "question": "Monday 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1696,
+     "ms": 2345,
      "detail": null
     },
     {
      "seq": 11,
-     "t_ms": 2910,
+     "t_ms": 4559,
      "type": "escalation",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1",
-     "question": "Monday 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
      "lease_seconds": 60.0,
      "delivery": {
       "channel": "sms",
       "simulated": true,
-      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. Monday 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it? Reply Y to take it, N to pass.",
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it? Reply Y to take it, N to pass.",
       "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
      }
     },
     {
      "seq": 12,
-     "t_ms": 4832,
+     "t_ms": 6719,
      "type": "human_answer",
      "actor": "sitter:dev",
      "ticket": 41,
@@ -760,7 +761,7 @@
     },
     {
      "seq": 13,
-     "t_ms": 4833,
+     "t_ms": 6720,
      "type": "decision",
      "actor": "sitter:dev",
      "ticket": 41,
@@ -776,7 +777,7 @@
     },
     {
      "seq": 14,
-     "t_ms": 4837,
+     "t_ms": 6724,
      "type": "passed",
      "actor": "desk",
      "ticket": 41,
@@ -787,7 +788,7 @@
     },
     {
      "seq": 15,
-     "t_ms": 4837,
+     "t_ms": 6725,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 42",
@@ -804,7 +805,7 @@
     },
     {
      "seq": 16,
-     "t_ms": 4841,
+     "t_ms": 6728,
      "type": "wire",
      "actor": "sitter:dev",
      "to": "desk",
@@ -823,7 +824,7 @@
     },
     {
      "seq": 17,
-     "t_ms": 4841,
+     "t_ms": 6728,
      "type": "deciding",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -831,7 +832,7 @@
     },
     {
      "seq": 18,
-     "t_ms": 6379,
+     "t_ms": 8514,
      "type": "decision",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -843,31 +844,31 @@
       "e1",
       "t1"
      ],
-     "question": "Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but before 10; is your annual checkup urgent enough to take it?",
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1535,
+     "ms": 1783,
      "detail": null
     },
     {
      "seq": 19,
-     "t_ms": 6379,
+     "t_ms": 8514,
      "type": "escalation",
      "actor": "sitter:ana",
      "ticket": 42,
      "offer_id": "offer-2",
-     "question": "Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but before 10; is your annual checkup urgent enough to take it?",
      "lease_seconds": 60.0,
      "delivery": {
       "channel": "sms",
       "simulated": true,
-      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it? Reply Y to take it, N to pass.",
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. Monday at 9:30 AM is open but before 10; is your annual checkup urgent enough to take it? Reply Y to take it, N to pass.",
       "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
      }
     },
     {
      "seq": 20,
-     "t_ms": 8386,
+     "t_ms": 10550,
      "type": "human_answer",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -876,7 +877,7 @@
     },
     {
      "seq": 21,
-     "t_ms": 8386,
+     "t_ms": 10550,
      "type": "decision",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -892,7 +893,7 @@
     },
     {
      "seq": 22,
-     "t_ms": 8390,
+     "t_ms": 10558,
      "type": "passed",
      "actor": "desk",
      "ticket": 42,
@@ -903,7 +904,7 @@
     },
     {
      "seq": 23,
-     "t_ms": 8390,
+     "t_ms": 10559,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 43",
@@ -920,7 +921,7 @@
     },
     {
      "seq": 24,
-     "t_ms": 8393,
+     "t_ms": 10562,
      "type": "wire",
      "actor": "sitter:ana",
      "to": "desk",
@@ -939,7 +940,7 @@
     },
     {
      "seq": 25,
-     "t_ms": 8394,
+     "t_ms": 10562,
      "type": "deciding",
      "actor": "sitter:sam",
      "ticket": 43,
@@ -947,13 +948,13 @@
     },
     {
      "seq": 26,
-     "t_ms": 9456,
+     "t_ms": 15527,
      "type": "decision",
      "actor": "sitter:sam",
      "ticket": 43,
      "offer_id": "offer-3",
      "decision": "accept",
-     "reason": "You have 90 free minutes before the slot, easily meeting your 20-minute travel time, and any time works for you.",
+     "reason": "Any time works for you, and you have ninety free minutes before the slot, which is plenty of travel time.",
      "evidence": [
       "c1",
       "c2",
@@ -963,12 +964,12 @@
      "question": null,
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1058,
+     "ms": 4962,
      "detail": null
     },
     {
      "seq": 27,
-     "t_ms": 9459,
+     "t_ms": 15531,
      "type": "held",
      "actor": "desk",
      "ticket": 43,
@@ -977,7 +978,7 @@
     },
     {
      "seq": 28,
-     "t_ms": 9460,
+     "t_ms": 15531,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -995,7 +996,7 @@
     },
     {
      "seq": 29,
-     "t_ms": 9463,
+     "t_ms": 15534,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 43,
@@ -1011,7 +1012,7 @@
     },
     {
      "seq": 30,
-     "t_ms": 9463,
+     "t_ms": 15535,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -1033,7 +1034,7 @@
     },
     {
      "seq": 31,
-     "t_ms": 9869,
+     "t_ms": 15941,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 43,
@@ -1049,7 +1050,7 @@
     },
     {
      "seq": 32,
-     "t_ms": 9869,
+     "t_ms": 15942,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -1076,8 +1077,8 @@
     "events_read": 32,
     "served": {
      "ticket": 43,
-     "wait_s": 9.4,
-     "answer": "Ticket 43 waited 9.4 s in line, from taking the ticket (event 4) to the booking (event 29). The slot came free at event 7 and was booked 8.3 s later. Its own offer took 1.1 s from offer (event 23) to booking.",
+     "wait_s": 15.5,
+     "answer": "Ticket 43 waited 15.5 s in line, from taking the ticket (event 4) to the booking (event 29). The slot came free at event 7 and was booked 13.3 s later. Its own offer took 5.0 s from offer (event 23) to booking.",
      "evidence_seq": [
       4,
       7,
@@ -1247,7 +1248,7 @@
     },
     {
      "seq": 2,
-     "t_ms": 3,
+     "t_ms": 4,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 41,
@@ -1257,7 +1258,7 @@
     },
     {
      "seq": 3,
-     "t_ms": 7,
+     "t_ms": 9,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 42,
@@ -1267,7 +1268,7 @@
     },
     {
      "seq": 4,
-     "t_ms": 11,
+     "t_ms": 13,
      "type": "ticket_taken",
      "actor": "desk",
      "ticket": 43,
@@ -1277,7 +1278,7 @@
     },
     {
      "seq": 5,
-     "t_ms": 13,
+     "t_ms": 15,
      "type": "cancellation_received",
      "actor": "desk",
      "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
@@ -1285,7 +1286,7 @@
     },
     {
      "seq": 6,
-     "t_ms": 1222,
+     "t_ms": 2605,
      "type": "cancellation_parsed",
      "actor": "desk",
      "parsed": {
@@ -1295,11 +1296,11 @@
       "time": "09:30"
      },
      "model": "gemini-3.8-flash",
-     "ms": 1206
+     "ms": 2586
     },
     {
      "seq": 7,
-     "t_ms": 1222,
+     "t_ms": 2605,
      "type": "slot_freed",
      "actor": "desk",
      "slot": {
@@ -1313,7 +1314,7 @@
     },
     {
      "seq": 8,
-     "t_ms": 1222,
+     "t_ms": 2605,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 41",
@@ -1330,7 +1331,7 @@
     },
     {
      "seq": 9,
-     "t_ms": 1226,
+     "t_ms": 2616,
      "type": "deciding",
      "actor": "sitter:dev",
      "ticket": 41,
@@ -1338,43 +1339,43 @@
     },
     {
      "seq": 10,
-     "t_ms": 2380,
+     "t_ms": 4833,
      "type": "decision",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1",
      "decision": "escalate",
-     "reason": "The offered slot is before 10 AM, and it is not specified whether your knee follow-up is urgent.",
+     "reason": "You prefer no mornings before 10 unless urgent, and it is not clear if this visit is urgent.",
      "evidence": [
       "c2",
       "e1",
       "t1"
      ],
-     "question": "Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but before 10; is your knee follow-up urgent enough to take it?",
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1151,
+     "ms": 2209,
      "detail": null
     },
     {
      "seq": 11,
-     "t_ms": 2380,
+     "t_ms": 4833,
      "type": "escalation",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1",
-     "question": "Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it?",
+     "question": "Monday at 9:30 AM is open but before 10; is your knee follow-up urgent enough to take it?",
      "lease_seconds": 10.0,
      "delivery": {
       "channel": "sms",
       "simulated": true,
-      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Monday at 9:30 AM is open but it is before 10; is your knee follow-up urgent enough to take it? Reply Y to take it, N to pass.",
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Monday at 9:30 AM is open but before 10; is your knee follow-up urgent enough to take it? Reply Y to take it, N to pass.",
       "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
      }
     },
     {
      "seq": 12,
-     "t_ms": 11369,
+     "t_ms": 12607,
      "type": "lease_expired",
      "actor": "desk",
      "ticket": 41,
@@ -1383,11 +1384,12 @@
      "misses": 1,
      "max_misses": 2,
      "ticket_status": "waiting",
-     "position": 1
+     "position": 1,
+     "noticed_by": "sweeper"
     },
     {
      "seq": 13,
-     "t_ms": 11371,
+     "t_ms": 12607,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 42",
@@ -1404,7 +1406,7 @@
     },
     {
      "seq": 14,
-     "t_ms": 11391,
+     "t_ms": 12612,
      "type": "deciding",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -1412,51 +1414,51 @@
     },
     {
      "seq": 15,
-     "t_ms": 12381,
+     "t_ms": 14442,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "escalate",
+     "reason": "The appointment is before 10 AM, and it is unclear whether your annual checkup counts as urgent.",
+     "evidence": [
+      "c1",
+      "e1",
+      "t1"
+     ],
+     "question": "Monday at 9:30 AM is open before 10 AM; is your annual checkup urgent enough to take it?",
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1826,
+     "detail": null
+    },
+    {
+     "seq": 16,
+     "t_ms": 14442,
+     "type": "escalation",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "question": "Monday at 9:30 AM is open before 10 AM; is your annual checkup urgent enough to take it?",
+     "lease_seconds": 10.0,
+     "delivery": {
+      "channel": "sms",
+      "simulated": true,
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Monday at 9:30 AM is open before 10 AM; is your annual checkup urgent enough to take it? Reply Y to take it, N to pass.",
+      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
+     }
+    },
+    {
+     "seq": 17,
+     "t_ms": 14835,
      "type": "escalation_unanswered",
      "actor": "sitter:dev",
      "ticket": 41,
      "offer_id": "offer-1"
     },
     {
-     "seq": 16,
-     "t_ms": 14305,
-     "type": "decision",
-     "actor": "sitter:ana",
-     "ticket": 42,
-     "offer_id": "offer-2",
-     "decision": "escalate",
-     "reason": "The appointment is before 10 AM, and it is unclear if your annual checkup is urgent.",
-     "evidence": [
-      "c1",
-      "e1",
-      "t1"
-     ],
-     "question": "Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it?",
-     "source": "model",
-     "model": "gemini-3.8-flash",
-     "ms": 2906,
-     "detail": null
-    },
-    {
-     "seq": 17,
-     "t_ms": 14305,
-     "type": "escalation",
-     "actor": "sitter:ana",
-     "ticket": 42,
-     "offer_id": "offer-2",
-     "question": "Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it?",
-     "lease_seconds": 10.0,
-     "delivery": {
-      "channel": "sms",
-      "simulated": true,
-      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Monday 9:30 AM is open but it is before 10; is your annual checkup urgent enough to take it? Reply Y to take it, N to pass.",
-      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
-     }
-    },
-    {
      "seq": 18,
-     "t_ms": 16272,
+     "t_ms": 16582,
      "type": "human_answer",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -1465,7 +1467,7 @@
     },
     {
      "seq": 19,
-     "t_ms": 16272,
+     "t_ms": 16583,
      "type": "decision",
      "actor": "sitter:ana",
      "ticket": 42,
@@ -1481,7 +1483,7 @@
     },
     {
      "seq": 20,
-     "t_ms": 16276,
+     "t_ms": 16618,
      "type": "passed",
      "actor": "desk",
      "ticket": 42,
@@ -1492,7 +1494,7 @@
     },
     {
      "seq": 21,
-     "t_ms": 16276,
+     "t_ms": 16618,
      "type": "offer",
      "actor": "desk",
      "to": "ticket 43",
@@ -1509,7 +1511,7 @@
     },
     {
      "seq": 22,
-     "t_ms": 16279,
+     "t_ms": 16635,
      "type": "wire",
      "actor": "sitter:ana",
      "to": "desk",
@@ -1528,7 +1530,7 @@
     },
     {
      "seq": 23,
-     "t_ms": 16280,
+     "t_ms": 16647,
      "type": "deciding",
      "actor": "sitter:sam",
      "ticket": 43,
@@ -1536,13 +1538,13 @@
     },
     {
      "seq": 24,
-     "t_ms": 17601,
+     "t_ms": 19077,
      "type": "decision",
      "actor": "sitter:sam",
      "ticket": 43,
      "offer_id": "offer-3",
      "decision": "accept",
-     "reason": "You have 90 free minutes before the slot, easily meeting your 20-minute travel requirement.",
+     "reason": "Any time of day works for you, and you have plenty of time after the gym to arrive.",
      "evidence": [
       "c1",
       "c2",
@@ -1553,12 +1555,12 @@
      "question": null,
      "source": "model",
      "model": "gemini-3.8-flash",
-     "ms": 1318,
+     "ms": 2415,
      "detail": null
     },
     {
      "seq": 25,
-     "t_ms": 17605,
+     "t_ms": 19085,
      "type": "held",
      "actor": "desk",
      "ticket": 43,
@@ -1567,7 +1569,7 @@
     },
     {
      "seq": 26,
-     "t_ms": 17605,
+     "t_ms": 19086,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -1585,7 +1587,7 @@
     },
     {
      "seq": 27,
-     "t_ms": 17613,
+     "t_ms": 19089,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 43,
@@ -1601,7 +1603,7 @@
     },
     {
      "seq": 28,
-     "t_ms": 17614,
+     "t_ms": 19090,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -1623,7 +1625,7 @@
     },
     {
      "seq": 29,
-     "t_ms": 18020,
+     "t_ms": 19500,
      "type": "confirmed",
      "actor": "desk",
      "ticket": 43,
@@ -1639,7 +1641,7 @@
     },
     {
      "seq": 30,
-     "t_ms": 18020,
+     "t_ms": 19500,
      "type": "wire",
      "actor": "sitter:sam",
      "to": "desk",
@@ -1666,8 +1668,8 @@
     "events_read": 30,
     "served": {
      "ticket": 43,
-     "wait_s": 17.6,
-     "answer": "Ticket 43 waited 17.6 s in line, from taking the ticket (event 4) to the booking (event 27). The slot came free at event 7 and was booked 16.4 s later. Its own offer took 1.3 s from offer (event 21) to booking.",
+     "wait_s": 19.1,
+     "answer": "Ticket 43 waited 19.1 s in line, from taking the ticket (event 4) to the booking (event 27). The slot came free at event 7 and was booked 16.5 s later. Its own offer took 2.5 s from offer (event 21) to booking.",
      "evidence_seq": [
       4,
       7,

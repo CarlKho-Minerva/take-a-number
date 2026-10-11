@@ -57,6 +57,7 @@ class FrontDesk:
         self._labels: dict[int, str] = {}
         self._tasks: set[asyncio.Task[Any]] = set()
         self._advance_lock = asyncio.Lock()
+        self._expired_reported: set[str] = set()
 
     actor = "desk"
 
@@ -233,16 +234,25 @@ class FrontDesk:
                         error=type(exc).__name__, misses=t.misses, ticket_status=t.status,
                     )
 
+    def report_expired(self, offer_id: str, noticed_by: str = "sweeper") -> bool:
+        """Say once, on the transcript, that a lease ran out. Returns False if already said."""
+        if offer_id in self._expired_reported:
+            return False
+        self._expired_reported.add(offer_id)
+        offer = self.line.offer(offer_id)
+        t = self.line.ticket(offer.ticket)
+        self.transcript.emit(
+            "lease_expired", self.actor, ticket=offer.ticket, offer_id=offer.offer_id, slot_id=offer.slot_id,
+            misses=t.misses, max_misses=self.line.max_misses, ticket_status=t.status,
+            position=self.line.position(offer.ticket), noticed_by=noticed_by,
+        )
+        return True
+
     async def sweep(self) -> int:
         """Release leases that ran out and move those slots on. Returns how many expired."""
         expired = self.line.expire_due()
         for offer in expired:
-            t = self.line.ticket(offer.ticket)
-            self.transcript.emit(
-                "lease_expired", self.actor, ticket=offer.ticket, offer_id=offer.offer_id, slot_id=offer.slot_id,
-                misses=t.misses, max_misses=self.line.max_misses, ticket_status=t.status,
-                position=self.line.position(offer.ticket),
-            )
+            self.report_expired(offer.offer_id)
             await self.advance(offer.slot_id)
         # A slot can be left open with nobody asked, when everyone still eligible was busy
         # answering another slot. Try those again so no slot is stranded.

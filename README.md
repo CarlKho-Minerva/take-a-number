@@ -102,7 +102,7 @@ Counter-evidence, and the strongest objections:
 
 - **"US no-shows are far below 23%."** True. The median for US medical practices was 5% in 2018 and 7% in 2019 ([MGMA](https://www.mgma.com/data/data-stories/patient-no-shows-pose-concern-amid-medical-practic)). The 23% is a worldwide average weighted toward high no-show clinics. This project does not rest on no-shows. It handles announced cancellations, which is the 19.95% number.
 - **"This already exists. Epic does it."** This is the strongest objection and it is half right. Fast Pass proves that offering freed slots to a waitlist gets people seen two weeks sooner. What it also shows is the ceiling of doing it at human speed inside one portal: 89% of offers were not accepted, with a 12 hour window and a login. The bet here is that an agent that answers in two seconds and already knows the calendar does better than 11%. **That bet is untested.** Nothing in this repo measures it. It would take a real front desk and real patients.
-- **"Bots near booking systems are a known harm."** Also true, with a body count: the 2021 passport shutdown, the New York law, and Resy's own data that bots and brokers no-show at four times the normal rate ([Resy](https://resy.com/join/resources/restaurant-reservation-fraud/)). The answer is in the design and is only partly built: the business issues every ticket, one ticket per agent, tickets cannot be transferred, and a ticket that stops answering is dropped after two misses. Proving a ticket belongs to a real person is not solved here.
+- **"Bots near booking systems are a known harm."** Also true, and on the record: the 2021 passport shutdown, the New York law, and Resy's own data that bots and brokers no-show at four times the normal rate ([Resy](https://resy.com/join/resources/restaurant-reservation-fraud/)). The answer is in the design and is only partly built: the business issues every ticket, one ticket per agent, tickets cannot be transferred, and a ticket that stops answering is dropped after two misses. Proving a ticket belongs to a real person is not solved here.
 - **"Overbooking already handles this."** Overbooking compensates for people who vanish without a word, at the cost of longer waits in the room and staff overtime ([LaGanga and Lawrence, via CU Boulder](https://www.colorado.edu/today/2008/01/07/cu-boulder-study-clinics-overbook-appointments-can-increase-efficiency)). It does nothing with a slot that someone politely gave back a day early. The two can run together.
 
 Not found, so not claimed: how fast people answer a text offer, what share of offers expire unanswered, and how many staff minutes it takes to refill one cancelled slot.
@@ -138,7 +138,7 @@ sequenceDiagram
         S1->>P: one yes or no question, by text
         P-->>S1: Y or N
     end
-    Note over D,S2: no answer in 60 s means the lease runs out, the slot goes to the next ticket, and the silent ticket takes a miss
+    Note over D,S2: no answer in 60 s, the lease runs out and the next ticket is asked
 ```
 
 The verbs, all JSON over HTTP:
@@ -188,7 +188,7 @@ git clone https://github.com/CarlKho-Minerva/take-a-number
 cd take-a-number
 cp .env.example .env          # put one model key in it; GEMINI_API_KEY is tried first
 uv sync
-uv run pytest -q              # 54 tests, no network, under 5 seconds
+uv run pytest -q              # 55 tests, no network, under 5 seconds
 uv run uvicorn take_a_number.app:app --port 8041
 ```
 

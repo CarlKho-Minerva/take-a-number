@@ -231,6 +231,19 @@ async def test_lease_expiring_between_decision_and_accept_does_not_book(make_wor
     assert (await until(world, "offer", count=2))[1]["ticket"] == 42  # and the slot moved on
 
 
+async def test_answer_arriving_after_the_sweeper_expired_the_lease_is_refused_and_reported_once(make_world):
+    world, _ = await make_world(lease_seconds=0.1)
+    await world.desk.handle_cancellation(TOM)
+    await until(world, "escalation")
+    await until(world, "lease_expired", sweep=True)  # the sweeper notices first
+    late = world.sitters["dev"]
+    status, body = await late._desk("accept", {"offer_id": "offer-1"})  # the person said yes too late
+    assert status == 410 and body["error"] == "lease_expired"
+    await asyncio.sleep(0.05)
+    expired_for_41 = [e for e in world.transcript.all() if e["type"] == "lease_expired" and e["ticket"] == 41]
+    assert len(expired_for_41) == 1 and world.desk.line.ticket(41).misses == 1  # said once, counted once
+
+
 async def test_duplicate_confirm_over_http_returns_the_same_booking(make_world):
     world, factory = await make_world()
     await world.desk.handle_cancellation(MARIA)

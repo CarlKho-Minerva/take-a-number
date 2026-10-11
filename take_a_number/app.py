@@ -63,7 +63,6 @@ class World:
             for p in scenario.people(day0)
         }
         self.lease_seconds = lease_seconds
-        self._reported_expired: set[str] = set()
 
     async def open(self) -> None:
         self.transcript.emit(
@@ -202,16 +201,9 @@ def _auth(body: TicketAuth) -> FrontDesk:
 
 
 def _on_lease_expired(desk: FrontDesk, w: World, offer_id: str) -> None:
-    """An answer arrived after the lease ran out, before the sweeper saw it. Report it and move the slot on."""
-    if offer_id in w._reported_expired:
-        return
-    w._reported_expired.add(offer_id)
-    offer = desk.line.offer(offer_id)
-    t = desk.line.ticket(offer.ticket)
-    w.transcript.emit("lease_expired", "desk", ticket=offer.ticket, offer_id=offer_id, slot_id=offer.slot_id,
-                      misses=t.misses, max_misses=desk.line.max_misses, ticket_status=t.status,
-                      position=desk.line.position(offer.ticket), noticed_by="late answer")
-    _spawn(desk.advance(offer.slot_id))
+    """An answer arrived after the lease ran out. If the sweeper has not said so yet, say it and move the slot on."""
+    if desk.report_expired(offer_id, noticed_by="late answer"):
+        _spawn(desk.advance(desk.line.offer(offer_id).slot_id))
 
 
 @app.post("/desk/a2a/take_ticket")
