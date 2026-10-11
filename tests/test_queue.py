@@ -288,3 +288,43 @@ def test_booked_slot_is_never_offered_again(line):
     line.open_slot("s1")  # opening again is a no-op
     assert line.next_offer("s1", 60) is None
     assert line.slot("s1").booked_by == 41
+
+
+def test_a_busy_ticket_is_asked_later_not_skipped_for_good(line):
+    line.open_slot("s1")
+    line.open_slot("s2")
+    first = line.next_offer("s1", 60)  # 41 is now busy with s1
+    for expected in (42, 43):
+        offer = line.next_offer("s2", 60)
+        assert offer.ticket == expected
+        line.pass_(offer.offer_id, expected)
+    assert line.next_offer("s2", 60) is None  # only 41 is left and 41 is busy
+    assert line.slot("s2").status == "open"  # so the slot waits; it is not written off
+    assert line.open_slots() == ["s2"]
+    line.pass_(first.offer_id, 41)
+    assert line.next_offer("s2", 60).ticket == 41
+
+
+def test_late_joiner_is_offered_a_slot_everyone_else_passed(line):
+    line.open_slot("s1")
+    for expected in (41, 42, 43):
+        offer = line.next_offer("s1", 60)
+        line.pass_(offer.offer_id, expected)
+    assert line.next_offer("s1", 60) is None and line.slot("s1").status == "unfilled"
+    newcomer = line.take_ticket("zoe")
+    line.open_slot("s1")  # the desk puts the still-free slot back up
+    assert line.next_offer("s1", 60).ticket == newcomer.number
+
+
+def test_everyone_passing_stays_fast_with_a_long_line(clock):
+    import time as real_time
+
+    line = TicketLine(clock=clock)
+    for i in range(3000):
+        line.take_ticket(f"agent-{i}")
+    line.open_slot("s1")
+    started = real_time.perf_counter()
+    while (offer := line.next_offer("s1", 60)) is not None:
+        line.pass_(offer.offer_id, offer.ticket)
+    assert real_time.perf_counter() - started < 1.0  # was 3.5 s at 2,000 tickets before the cursor
+    assert len(line.waiting()) == 3000

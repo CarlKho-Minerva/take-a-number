@@ -195,6 +195,16 @@ async def test_model_timeout_on_the_decision_never_accepts_by_itself(make_world)
     assert confirmed[0]["ticket"] == 42
 
 
+async def test_outage_switch_makes_sitters_decide_without_the_model(make_world, monkeypatch):
+    world, _ = await make_world()
+    monkeypatch.setattr(llm, "FORCE_UNAVAILABLE", True)
+    await world.desk.handle_cancellation(MARIA)  # the desk still reads the message
+    await until(world, "escalation")
+    decisions = [(e["ticket"], e["decision"], e["source"]) for e in world.transcript.all() if e["type"] == "decision"]
+    assert decisions == [(41, "pass", "code"), (42, "escalate", "code")]
+    assert "confirmed" not in types(world)
+
+
 async def test_unanswered_question_lets_the_lease_expire_and_the_slot_moves_on(make_world):
     world, _ = await make_world(lease_seconds=0.15)
     await world.desk.handle_cancellation(TOM)  # 9:30: ticket 41 must ask its person
@@ -258,6 +268,24 @@ async def test_unreachable_sitter_counts_as_a_miss_and_the_slot_moves_on(make_wo
     await until(world, "confirmed")
     undeliverable = [e for e in world.transcript.all() if e["type"] == "offer_undeliverable"]
     assert undeliverable[0]["ticket"] == 41 and undeliverable[0]["misses"] == 1
+
+
+async def test_two_cancellations_at_once_strand_no_slot(make_world):
+    world, _ = await make_world()
+    await asyncio.gather(world.desk.handle_cancellation(MARIA), world.desk.handle_cancellation(TOM))
+    for _ in range(300):  # sweep like the server does, and answer any question with no
+        await world.desk.sweep()
+        for sitter in world.sitters.values():
+            if sitter.pending_questions():
+                sitter.human_answer(False)
+        slots = {s["slot_id"]: s["status"] for s in world.desk.line.snapshot()["slots"]}
+        if len(slots) == 2 and all(status in ("booked", "unfilled") for status in slots.values()):
+            break
+        await asyncio.sleep(0.01)
+    assert len(slots) == 2 and all(status in ("booked", "unfilled") for status in slots.values()), slots
+    booked = [b["ticket"] for b in world.desk.line.snapshot()["bookings"]]
+    assert len(booked) == len(set(booked))  # nobody got two slots
+    assert "agent_error" not in types(world)
 
 
 # ---- the guard: the model cannot invent or overrule ------------------------

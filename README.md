@@ -160,7 +160,7 @@ Each agent publishes a card at `/.well-known/agent-card.json` (the current A2A p
 
 **Three passes before calling it done.**
 
-Failure paths, each with a test in `tests/`:
+Failure paths, each with a test in `tests/`. The page has a switch, "sitter model outage (simulated)", that shows the second row live, and a 10 second lease setting that shows the fourth:
 
 | What goes wrong | What happens |
 |---|---|
@@ -173,12 +173,13 @@ Failure paths, each with a test in `tests/`:
 | Same key used on a different offer | Refused with `idempotency_conflict`. |
 | Sitter's server is unreachable | Counts as a miss, the slot moves on at once. |
 | A forged offer tells a sitter to reply to some other address | Ignored. A sitter only answers the desk it took its ticket from, so its ticket secret goes nowhere else. |
+| Two cancellations arrive at once | Each slot is leased to a different ticket. A slot whose remaining tickets are all busy waits and is retried; it is not written off. |
 | Nobody is in line, or everyone passes | The slot is reported unfilled and returns to normal booking. Everyone keeps their place. |
 | Vague message ("cancel my appointment at 3") | Needs two of name, date, time, and exactly one match. Otherwise staff. |
 
 Latency, measured on 2026-10-11 over 7 real runs on one laptop with Gemini 3.8 Flash (`scripts/latency.py`): one offer round, from the desk sending the offer to having the sitter's answer, took a median of 1.5 s (1.1 to 1.9 s). The model call was 1.49 s of that. The protocol itself, two HTTP hops and the queue, added a median of 16 ms (10 to 18 ms). Cancellation message to confirmed booking, with one pass on the way, took a median of 4.7 s (3.6 to 5.5 s). The model is the cost, so the one optimization that would matter is asking the next ticket's agent to think ahead. I left it out because it tells a second agent about a slot it has not been offered.
 
-Memory, time and space: the line keeps tickets in a dict in arrival order, so picking the next ticket is a scan, O(n) in the number of tickets, and every other operation is O(1) by key. For a clinic's line of tens or hundreds that scan is microseconds; a line of millions would want a heap. Memory is O(tickets + offers + bookings) and nothing is evicted, so a long-running desk would need to expire old offers and idempotency keys (a day is the usual choice) and keep the line in a database, since today it lives in process memory and is lost on restart. The transcript and the JSONL event log grow by about 300 bytes per event, around 20 events per filled slot. Each model call sends about 550 tokens, estimated as characters divided by four.
+Memory, time and space, measured with `scripts/bench_queue.py`: taking a ticket, accept, pass and confirm are O(1) by key. Picking the next ticket scans forward from a per-slot cursor that never moves back, so offering one slot down a whole line is O(n) in total. I found that by measuring: the first version rescanned from the front and kept the "already asked" tickets in a list, and with 2,000 tickets all passing it took 3.5 s. With the cursor and a dict it takes 24 ms, and 100,000 tickets take about 1 s. A first offer is about 10 microseconds at any size tested. `position` is still a scan, O(n), which is under a millisecond for a line of thousands. Memory is O(tickets + offers + bookings), about 0.7 KB per ticket with one offer each (70 MB at 100,000), and the whole server sat at 26 MB during the demo. Nothing is evicted, so a long-running desk would need to expire old offers and idempotency keys (a day is the usual choice) and keep the line in a database, since today it lives in process memory and is lost on restart. The transcript and the JSONL event log grow by about 300 bytes per event, around 20 events per filled slot. Each model call sends about 550 tokens, estimated as characters divided by four.
 
 ## Run it
 
@@ -187,7 +188,7 @@ git clone https://github.com/CarlKho-Minerva/take-a-number
 cd take-a-number
 cp .env.example .env          # put one model key in it; GEMINI_API_KEY is tried first
 uv sync
-uv run pytest -q              # 49 tests, no network, under 5 seconds
+uv run pytest -q              # 54 tests, no network, under 5 seconds
 uv run uvicorn take_a_number.app:app --port 8041
 ```
 
@@ -204,6 +205,7 @@ Other commands:
 ```bash
 uv run python scripts/record.py          # record three real runs into docs/replay.json (server must be running)
 uv run python scripts/latency.py 7       # measure offer rounds against the running server
+uv run python scripts/bench_queue.py     # time the line itself with up to 100,000 tickets
 uv run python scripts/darwin_listing.py https://your-public-host   # write the Darwin listing file; submits nothing
 curl -s http://127.0.0.1:8041/.well-known/agent-card.json           # the front desk's agent card
 ```
@@ -212,7 +214,7 @@ curl -s http://127.0.0.1:8041/.well-known/agent-card.json           # the front 
 
 Real:
 
-- The line: ticket order, leases, pass, misses, no-show, idempotent confirm. Plain Python in `take_a_number/queue.py`, 25 tests on that file alone.
+- The line: ticket order, leases, pass, misses, no-show, idempotent confirm. Plain Python in `take_a_number/queue.py`, 28 tests on that file alone.
 - The messages. The front desk and the three Line Sitters talk over real HTTP, each at its own URL with its own agent card.
 - The model calls in LIVE mode: one to read the cancellation, one per offer. Gemini 3.8 Flash. Azure OpenAI is the working fallback: with Gemini switched off in a probe it answered correctly in 7.6 s, which is slow but inside the 8 s limit.
 - The recording. `docs/replay.json` is three real runs saved by `scripts/record.py` and not edited. An earlier recording caught a real model hiccup (an unusable reply; the sitter asked its person, as designed). I added one retry and recorded again, so the shipped runs are clean.

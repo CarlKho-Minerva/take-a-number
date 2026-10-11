@@ -297,6 +297,8 @@ class LineSitter:
         facts, overlaps = build_facts(self.person, slot)
         user = "Facts:\n" + "\n".join(f"{k}: {v}" for k, v in facts.items())
         try:
+            if llm.FORCE_UNAVAILABLE:
+                raise llm.LLMUnavailable("outage simulated by the demo switch")
             result = await llm.complete_json(SYSTEM_PROMPT, user)
         except llm.LLMUnavailable as exc:
             return decide_without_model(overlaps, slot, str(exc)[:200] or "no reply")

@@ -407,7 +407,7 @@
       html += `<label class="sr-only" for="free">Text the front desk</label><input class="field" id="free" maxlength="300" placeholder="or text the front desk in your own words (simulated inbound text)">
         <button class="btn btn--ghost" id="send" ${running ? 'disabled' : ''}>Send</button>
         <label class="sr-only" for="lease">Lease length</label><select class="field" id="lease"><option value="60" ${ui.lease === 60 ? 'selected' : ''}>lease 60 s</option><option value="10" ${ui.lease === 10 ? 'selected' : ''}>lease 10 s</option></select>
-        <label class="check"><input type="checkbox" id="modelOff" ${ui.modelOff ? 'checked' : ''}> model outage (simulated)</label>
+        <label class="check"><input type="checkbox" id="modelOff" ${ui.modelOff ? 'checked' : ''}> sitter model outage (simulated)</label>
         <button class="btn btn--ghost" id="reset">Reset</button>`;
     }
     $('controls').innerHTML = html;
@@ -458,7 +458,7 @@
     if (ui.mode === 'live') {
       const off = ui.modelOff;
       el.className = `st ${off ? 'warn' : 'running'}`;
-      el.textContent = off ? 'live, model outage simulated' : `live, model: ${(ui.health?.model_providers || []).join(' then ') || 'none set'}`;
+      el.textContent = off ? 'live, sitter model outage simulated' : `live, model: ${(ui.health?.model_providers || []).join(' then ') || 'none set'}`;
     } else {
       el.className = 'st';
       el.textContent = ui.liveOk ? 'replay of a recorded run' : 'replay of a recorded run (no agents reachable from this page)';

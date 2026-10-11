@@ -244,6 +244,10 @@ class FrontDesk:
                 position=self.line.position(offer.ticket),
             )
             await self.advance(offer.slot_id)
+        # A slot can be left open with nobody asked, when everyone still eligible was busy
+        # answering another slot. Try those again so no slot is stranded.
+        for slot_id in self.line.open_slots():
+            await self.advance(slot_id)
         return len(expired)
 
     def _spawn(self, coro: Any) -> None:

@@ -84,7 +84,8 @@ class Slot:
     info: dict[str, Any]
     opened_at: float
     status: str = "open"  # open | offered | booked | unfilled
-    tried: list[int] = field(default_factory=list)  # tickets that passed or missed
+    tried: dict[int, None] = field(default_factory=dict)  # tickets that passed or missed, in order; a dict so lookup is O(1)
+    cursor: int = 0  # every ticket before this index in the line can never be offered this slot
     booked_by: int | None = None
 
 
@@ -120,6 +121,7 @@ class TicketLine:
         self.max_misses = max_misses
         self._lock = threading.RLock()
         self._tickets: dict[int, Ticket] = {}  # insertion order is line order
+        self._order: list[int] = []  # ticket numbers in line order, append-only
         self._by_holder: dict[str, int] = {}
         self._slots: dict[str, Slot] = {}
         self._offers: dict[str, Offer] = {}
@@ -148,6 +150,7 @@ class TicketLine:
             self._next_number += 1
             self._tickets[ticket.number] = ticket
             self._by_holder[holder] = ticket.number
+            self._order.append(ticket.number)
             return ticket
 
     def ticket(self, number: int) -> Ticket:
@@ -217,9 +220,20 @@ class TicketLine:
                 return None
             busy_waiting = False
             chosen: Ticket | None = None
-            for number, ticket in self._tickets.items():
+            # Scan from this slot's cursor, not from the front. A ticket that has left the
+            # line or already turned this slot down can never be offered it, so the cursor
+            # moves past it for good. That keeps "everyone passes" linear instead of quadratic.
+            advancing = True
+            index = slot.cursor
+            while index < len(self._order):
+                number = self._order[index]
+                ticket = self._tickets[number]
+                index += 1
                 if ticket.status != "waiting" or number in slot.tried:
+                    if advancing:
+                        slot.cursor = index
                     continue
+                advancing = False
                 if number in self._active_offer_by_ticket:
                     busy_waiting = True  # deciding on another slot; ask later
                     continue
@@ -243,6 +257,12 @@ class TicketLine:
             self._active_offer_by_slot[slot_id] = offer.offer_id
             slot.status = "offered"
             return offer
+
+    def open_slots(self) -> list[str]:
+        """Slots that are free and not out on a lease right now (for example, everyone
+        left to ask was busy with another slot)."""
+        with self._lock:
+            return [sid for sid, slot in self._slots.items() if slot.status == "open"]
 
     def offer(self, offer_id: str) -> Offer:
         with self._lock:
@@ -361,8 +381,7 @@ class TicketLine:
         """Take the slot back from this offer and make it offerable again."""
         offer.status = new_status
         slot = self._slots[offer.slot_id]
-        if offer.ticket not in slot.tried:
-            slot.tried.append(offer.ticket)
+        slot.tried[offer.ticket] = None
         slot.status = "open"
         self._active_offer_by_ticket.pop(offer.ticket, None)
         if self._active_offer_by_slot.get(offer.slot_id) == offer.offer_id:
