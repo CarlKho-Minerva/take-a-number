@@ -32,49 +32,52 @@ def ticket_story(events: list[dict[str, Any]], ticket: int) -> list[dict[str, An
     return [e for e in events if e.get("ticket") == ticket]
 
 
-def how_long_and_why(log: EventLog, served: int | None = None, passed: int | None = None) -> dict[str, Any]:
-    """How long did the served ticket wait, and why did the other one pass?
+def how_long_and_why(log: EventLog) -> dict[str, Any]:
+    """How long did the booked ticket wait, and why did the one before it pass?
 
-    Both tickets default to whatever the log itself shows. Every number in
-    the answer carries the seq numbers of the events it was read from.
+    Reads the most recent booking in the log and follows that slot's events
+    backwards. Every number in the answer carries the seq numbers of the
+    events it was read from.
     """
     events = log.events()
-    if served is None:
-        served = next((e["ticket"] for e in events if e["type"] == "confirmed" and not e.get("replayed")), None)
-    if passed is None:
-        passed = next((e["ticket"] for e in events if e["type"] == "passed"), None)
     out: dict[str, Any] = {"backend": log.backend, "simulated_keewano": True, "events_read": len(events)}
-
-    if served is not None:
-        story = ticket_story(events, served)
-        taken = next((e for e in story if e["type"] == "ticket_taken"), None)
-        offered = next((e for e in story if e["type"] == "offer"), None)
-        confirmed = next((e for e in story if e["type"] == "confirmed" and not e.get("replayed")), None)
-        freed = next((e for e in events if e["type"] == "slot_freed"), None)
-        if taken and confirmed:
-            wait_s = (confirmed["t_ms"] - taken["t_ms"]) / 1000
-            parts = [f"Ticket {served} waited {wait_s:.1f} s in line, from taking the ticket (event {taken['seq']}) to the booking (event {confirmed['seq']})."]
-            if freed:
-                parts.append(f"The slot came free at event {freed['seq']}; it was booked {(confirmed['t_ms'] - freed['t_ms']) / 1000:.1f} s later.")
-            if offered:
-                parts.append(f"Its own offer took {(confirmed['t_ms'] - offered['t_ms']) / 1000:.1f} s from offer (event {offered['seq']}) to booking.")
-            out["served"] = {"ticket": served, "wait_s": round(wait_s, 1), "answer": " ".join(parts),
-                             "evidence_seq": [e["seq"] for e in (taken, freed, offered, confirmed) if e]}
-        else:
-            out["served"] = {"ticket": served, "answer": f"The log does not show ticket {served} being booked."}
-    else:
+    confirmed = next((e for e in reversed(events) if e["type"] == "confirmed" and not e.get("replayed")), None)
+    if confirmed is None:
         out["served"] = {"ticket": None, "answer": "The log shows no booking yet."}
-
-    if passed is not None:
-        story = ticket_story(events, passed)
-        decision = next((e for e in story if e["type"] == "decision" and e.get("decision") == "pass"), None)
-        ack = next((e for e in story if e["type"] == "passed"), None)
-        if decision:
-            kept = f" It kept its place (position {ack['position']})." if ack and ack.get("position") else ""
-            out["passed"] = {"ticket": passed, "answer": f"Ticket {passed} passed because: {decision['reason']} (event {decision['seq']}, decided by {decision.get('source')}).{kept}",
-                             "evidence_seq": [e["seq"] for e in (decision, ack) if e]}
-        else:
-            out["passed"] = {"ticket": passed, "answer": f"The log does not show a pass decision for ticket {passed}."}
-    else:
         out["passed"] = {"ticket": None, "answer": "The log shows no pass yet."}
+        return out
+
+    served, slot_id = confirmed["ticket"], confirmed["slot_id"]
+    taken = next((e for e in events if e["type"] == "ticket_taken" and e["ticket"] == served), None)
+    offered = next((e for e in events if e["type"] == "offer" and e.get("offer_id") == confirmed["offer_id"]), None)
+    freed = next((e for e in reversed(events) if e["type"] == "slot_freed" and e["slot"]["slot_id"] == slot_id), None)
+    parts = []
+    wait_s = None
+    if taken:
+        wait_s = round((confirmed["t_ms"] - taken["t_ms"]) / 1000, 1)
+        parts.append(f"Ticket {served} waited {wait_s:.1f} s in line, from taking the ticket (event {taken['seq']}) to the booking (event {confirmed['seq']}).")
+    if freed:
+        parts.append(f"The slot came free at event {freed['seq']} and was booked {(confirmed['t_ms'] - freed['t_ms']) / 1000:.1f} s later.")
+    if offered:
+        parts.append(f"Its own offer took {(confirmed['t_ms'] - offered['t_ms']) / 1000:.1f} s from offer (event {offered['seq']}) to booking.")
+    out["served"] = {"ticket": served, "wait_s": wait_s, "answer": " ".join(parts),
+                     "evidence_seq": [e["seq"] for e in (taken, freed, offered, confirmed) if e]}
+
+    acks = [e for e in events if e["type"] == "passed" and e.get("slot_id") == slot_id]
+    answers = []
+    evidence: list[int] = []
+    for ack in acks:
+        decision = next((e for e in reversed(events) if e["type"] == "decision" and e.get("offer_id") == ack["offer_id"] and e.get("decision") == "pass"), None)
+        if decision is None:
+            continue
+        kept = f" It kept its place (position {ack['position']})." if ack.get("position") else ""
+        answers.append(f"Ticket {ack['ticket']} passed because: {decision['reason']} (event {decision['seq']}, decided by {decision.get('source')}).{kept}")
+        evidence += [decision["seq"], ack["seq"]]
+    expired = [e for e in events if e["type"] == "lease_expired" and e.get("slot_id") == slot_id]
+    for e in expired:
+        answers.append(f"Ticket {e['ticket']} did not answer before its lease ran out (event {e['seq']}); miss {e['misses']} of {e['max_misses']}.")
+        evidence.append(e["seq"])
+    out["passed"] = {"ticket": acks[0]["ticket"] if acks else None,
+                     "answer": " ".join(answers) or "Nobody passed on this slot; the first ticket asked took it.",
+                     "evidence_seq": evidence}
     return out

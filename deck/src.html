@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#07070a">
+<title>Take a Number. Your agent waits in line.</title>
+<link rel="stylesheet" href="/Users/carl/CODELocalProjects/lifeos/design/somach.css">
+<style>
+/* One 1920x1080 stage, one timeline. window.seek(ms) is the only clock, so a keypress, autoplay, the PDF and a
+   frame-by-frame render all draw the same thing. Source: deck/src.html. Build: kit.py inline src.html -o index.html */
+html,body{height:100%;overflow:hidden;background:var(--void)}
+#stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--s,1));transform-origin:center center;background:var(--void)}
+.beat{position:absolute;inset:0;display:none;width:1920px;height:1080px;overflow:hidden;background:var(--void)}
+.beat.cur{display:block}
+canvas.dots{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#field{position:absolute!important;left:0;top:0;width:1920px!important;height:1080px!important;min-height:0;max-height:none}
+.t{position:absolute;left:160px;font-family:var(--pixel);font-weight:400;color:var(--paper);letter-spacing:.01em;line-height:1.1;white-space:nowrap;will-change:transform,opacity}
+.t.h{font-size:88px}
+.t.m{font-size:56px}
+.t.s{font-size:40px;color:var(--paper-soft)}
+.i{position:absolute;left:160px;font:400 28px/1.4 var(--sans);color:var(--paper-soft);white-space:nowrap}
+.i.p{color:var(--paper)}
+.mn{position:absolute;font:400 18px/24px var(--mono);letter-spacing:.04em;color:var(--paper-mute);white-space:nowrap}
+.code{position:absolute;font:400 36px/1.2 var(--mono);color:var(--paper);white-space:nowrap;font-variant-ligatures:none}
+.px{position:absolute;font:400 20px/24px var(--pixel-sm);letter-spacing:.04em;color:var(--paper-soft);white-space:nowrap}
+.glow{color:var(--glow)}
+.fail{color:var(--fail)}
+.warn{color:var(--warn)}
+.mute{color:var(--paper-mute)}
+.wm{position:absolute;left:160px;top:72px;font-size:18px}
+.pg{position:absolute;right:160px;top:72px;font:400 14px/20px var(--mono);letter-spacing:.04em;color:var(--paper-mute)}
+#hud{position:absolute;right:160px;bottom:40px;font:400 14px/20px var(--mono);letter-spacing:.04em;color:var(--paper-mute)}
+#bar{position:absolute;left:0;bottom:0;height:2px;background:var(--glow);width:0}
+.word{display:inline-block;will-change:transform,opacity}
+#drawer{position:absolute;left:0;right:0;bottom:0;background:var(--void);border-top:1px solid var(--line);padding:20px 160px 28px;font:400 20px/29px var(--sans);display:none;max-height:420px;overflow:auto;color:var(--paper-soft);z-index:9}
+body.shownotes #drawer{display:block}
+#drawer .k{font:400 14px/20px var(--mono);letter-spacing:.04em;color:var(--paper-mute);margin-bottom:8px}
+#drawer p{margin:0 0 8px}
+#drawer p b{color:var(--glow);font-weight:400}
+/* print: every beat stacked at its last frame, one per page */
+html.print,body.print{overflow:visible;height:auto}
+body.print #stage{position:static;transform:none;width:1920px;height:auto}
+body.print .beat{position:relative;display:block;page-break-after:always;break-after:page}
+body.print #hud,body.print #bar,body.print #drawer{display:none}
+/* phone: every beat stacked at its last frame, scaled to the width, notes under each */
+html.phone,body.phone{overflow:auto;height:auto}
+body.phone #stage{position:static;transform:none;width:100%;height:auto}
+body.phone .beat{position:relative;display:block;transform-origin:top left;transform:scale(var(--k));margin-bottom:calc(1080px * var(--k) - 1080px)}
+body.phone #hud,body.phone #bar,body.phone #drawer{display:none}
+body.phone .pnotes{padding:12px 16px 28px;border-top:1px solid var(--hair);font:400 15px/1.5 var(--sans);color:var(--paper-soft);background:var(--void)}
+body.phone .pnotes p{margin:0 0 8px}
+body.phone .pnotes b{color:var(--glow);font-weight:400}
+body.phone .pnotes .k{font:400 11px/16px var(--mono);letter-spacing:.04em;color:var(--paper-mute);margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="beats"></div>
+  <div id="hud"></div>
+  <div id="bar"></div>
+  <div id="drawer"></div>
+</div>
+<script src="/Users/carl/CODELocalProjects/lifeos/design/signal.js"></script>
+<script>
+(function(){
+'use strict';
+const Q=new URLSearchParams(location.search);
+const PRINT=Q.get('print')==='1';
+const RENDER=Q.has('t')||Q.get('render')==='1';
+const AUTOPLAY=Q.get('autoplay')==='1';
+const $=(s,r)=>(r||document).querySelector(s);
+const stage=$('#stage');const host=$('#beats');
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const seg=(ms,a,d)=>clamp((ms-a)/d,0,1);
+const eo=t=>1-Math.pow(1-t,3), ei=t=>t*t*t, eio=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const GLOW=[207,226,255],PAPER=[242,246,255],SOFT=[168,180,200],MUTE=[115,127,147],FAIL=[240,184,176],WARN=[219,200,149];
+const rgba=(c,a)=>`rgba(${c[0]},${c[1]},${c[2]},${clamp(a,0,1).toFixed(3)})`;
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+const pad=n=>String(n).padStart(2,'0');
+
+/* ---- the partner slide reads from this table. Keep it true to the code: integrations/*.py ---- */
+/* mark: 'real' = a filled square, 'part' = a half-built square, 'none' = a ring */
+const PARTNERS=[
+  {name:'Dial',what:'texts the person one yes or no question',mark:'part',status:'coded to their API, simulated here'},
+  {name:'Darwin',what:'lists the front desk where agents search',mark:'part',status:'listing built, not submitted'},
+  {name:'Keewano',what:'answers how long, and why, from the events',mark:'part',status:'seam cut, JSONL behind it'},
+  {name:'Alike, Sparta',what:'',mark:'none',status:'not used'}
+];
+
+/* ---- tiny DOM helpers ---- */
+function el(tag,cls,html,style){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;if(style)Object.assign(e.style,style);return e}
+function tx(b,cls,html,x,y,style){const e=el('div',cls,html,style);e.style.left=x+'px';e.style.top=y+'px';b.appendChild(e);return e}
+function words(e){const ws=e.textContent.split(' ');e.innerHTML=ws.map(w=>'<span class="word">'+w+'</span>').join(' ');return Array.from(e.querySelectorAll('.word'))}
+function riseWords(ws,ms,a,per,d){ws.forEach((w,i)=>{const p=eo(seg(ms,a+i*per,d));w.style.opacity=p.toFixed(3);w.style.transform=`translateY(${lerp(28,0,p).toFixed(1)}px)`})}
+function fade(e,ms,a,d){e.style.opacity=eo(seg(ms,a,d)).toFixed(3)}
+function canvas(b){const c=document.createElement('canvas');c.className='dots';c.width=1920;c.height=1080;c.setAttribute('aria-hidden','true');b.appendChild(c);return c.getContext('2d')}
+/* the dot material: 2px squares */
+function dot(g,x,y,c,a,s){g.fillStyle=rgba(c,a);g.fillRect(Math.round(x),Math.round(y),s||2,s||2)}
+function block(g,x,y,w,h,c,a,st,s){st=st||6;s=s||2;g.fillStyle=rgba(c,a);for(let yy=0;yy<h;yy+=st)for(let xx=0;xx<w;xx+=st)g.fillRect(Math.round(x+xx),Math.round(y+yy),s,s)}
+function dline(g,x0,y0,x1,y1,c,a,gap,s){const L=Math.hypot(x1-x0,y1-y0);const n=Math.max(1,Math.floor(L/(gap||8)));g.fillStyle=rgba(c,a);for(let k=0;k<=n;k++){const t=k/n;g.fillRect(Math.round(lerp(x0,x1,t)),Math.round(lerp(y0,y1,t)),s||2,s||2)}}
+function drect(g,x,y,w,h,c,a,gap,s){dline(g,x,y,x+w,y,c,a,gap,s);dline(g,x+w,y,x+w,y+h,c,a,gap,s);dline(g,x+w,y+h,x,y+h,c,a,gap,s);dline(g,x,y+h,x,y,c,a,gap,s)}
+function box(g,x,y,w,h,c,a,p,lw){if(p<=0)return;g.strokeStyle=rgba(c,a);g.lineWidth=lw||2;const L=2*(w+h);g.setLineDash([L*p,L]);g.strokeRect(x,y,w,h);g.setLineDash([])}
+/* a lease: a row of dots that empties from the right. p = share already spent */
+function lease(g,cx,y,p,c,n){n=n||20;for(let k=0;k<n;k++){const lit=k<Math.ceil(n*(1-p));if(lit)dot(g,cx-n*4+k*8,y,c||GLOW,.95,4);else dot(g,cx-n*4+k*8+1,y+1,MUTE,.5,2)}}
+function quad(x0,y0,cx,cy,x1,y1,t){const u=1-t;return [u*u*x0+2*u*t*cx+t*t*x1,u*u*y0+2*u*t*cy+t*t*y1]}
+
+/* ============ beats: each {id,name,dur,build(el)->{seek(ms)}} ============ */
+const BEATS=[];
+
+/* 01 title: the strand, the name, the plain sentence */
+BEATS.push({id:'title',name:'Title',dur:6000,build(b){
+  const c=document.createElement('canvas');c.className='dots signal-field';c.id='field';c.setAttribute('aria-hidden','true');b.appendChild(c);
+  const h=tx(b,'t h signal-title','Take a Number.',160,690);
+  const i=tx(b,'i p','Your agent waits in line. The front desk\'s agent calls your number.',160,820,{fontSize:'34px'});
+  const m=tx(b,'mn','a16z SpeedHacks, 2026-10-11. Theme: give people their time back. Carl Kho.',160,900);
+  const w1=words(h);
+  let field=null,drawn=false;
+  // the canvas must be visible before signal.js measures it, so the strand is made on first use
+  function ensure(){if(drawn)return;drawn=true;
+    if(!RENDER&&!STATIC){try{field=SomachSignal.mountSignalField(c)}catch(e){console.error('[deck] strand: '+e)}}
+    else{try{SomachSignal.drawSignalFrame(c,{t:6.2})}catch(e){console.error('[deck] static strand: '+e)}}}
+  return {seek(ms){ensure();riseWords(w1,ms,500,140,600);fade(i,ms,1700,600);fade(m,ms,2500,600);
+      if(field&&field.surge)field.surge(ms>400&&ms<2400)},leave(){if(field)field.pause()},enter(){ensure();if(field)field.resume()}}
+}});
+
+/* 02 the story, told by the agent: a night passes on a timeline, and the three shifts he wanted empty out */
+BEATS.push({id:'story',name:'The story',dur:13000,build(b){
+  const g=canvas(b);
+  const ey=tx(b,'px glow','TOLD BY CARL\'S AI AGENT',160,126);
+  const w1=words(tx(b,'t h','I recommended shifts.',160,170)),w2=words(tx(b,'t h','Then I stopped.',160,270));
+  const X0=160,X1=1760,TY=720,SY=500,S=72,N=12;
+  const sx=k=>X0+k*(X1-X0-S)/(N-1);
+  const WANT={4:.76,7:.92,8:.84},OTHER={1:.62,10:.70};
+  const ticks=[[.03,'He asks me to pick shifts','l'],[.30,'I recommend, then wait','l'],[.56,'He goes to sleep','l'],[.95,'By morning, all three are gone','r']];
+  const labs=ticks.map(([u,t,side])=>{const e=tx(b,'px',t,0,TY+26);const x=lerp(X0,X1,u);if(side==='r'){e.style.left='auto';e.style.right=(1920-x-2)+'px'}else e.style.left=x+'px';return e});
+  labs[3].classList.add('fail');
+  const d0=tx(b,'mn','2026-09-28',lerp(X0,X1,.03),TY+56);
+  const wl=tx(b,'px glow','the ones he wanted',sx(4),SY-40);
+  const foot=tx(b,'i p','He wrote the rule down so no later agent would repeat it.',160,880,{fontSize:'32px'});
+  return {seek(ms){fade(ey,ms,100,400);riseWords(w1,ms,300,90,450);riseWords(w2,ms,1500,90,450);
+    g.clearRect(0,0,1920,1080);
+    const u=eio(seg(ms,2600,7200));const cx=lerp(X0,X1,u);
+    for(let k=0;k<N;k++){const p=eo(seg(ms,2000+k*70,400));if(p<=0)continue;const x=sx(k);
+      const want=k in WANT;const goneAt=want?WANT[k]:OTHER[k];const gone=goneAt!=null&&u>=goneAt;
+      if(!gone)block(g,x,SY,S,S,want&&u>=.30?GLOW:SOFT,(want&&u>=.30?.85:.45)*p,6,2);
+      if(want&&u>=.30)box(g,x-6,SY-6,S+12,S+12,gone?FAIL:GLOW,.95,1);
+      else if(gone)drect(g,x,SY,S,S,MUTE,.7,8)}
+    dline(g,X0,TY,X1,TY,MUTE,.55,8);if(u>0)dline(g,X0,TY,cx,TY,PAPER,.9,8);
+    ticks.forEach(([tu],k)=>{const x=lerp(X0,X1,tu);const p=eo(clamp((cx-x)/70,0,1))*(ms>=2600?1:0);labs[k].style.opacity=p.toFixed(3);if(p>0){g.fillStyle=rgba(k===3?FAIL:PAPER,p);g.fillRect(x,TY-8,2,18)}});
+    d0.style.opacity=labs[0].style.opacity;
+    wl.style.opacity=eo(clamp((u-.30)/.05,0,1)).toFixed(3);
+    if(u>0&&u<1){g.fillStyle=rgba(GLOW,.9);g.fillRect(cx,SY-20,2,TY-SY+30)}
+    fade(foot,ms,10600,700)}}
+}});
+
+/* 03 the general problem: a line that does not move, with one person stuck in it while a clock fills */
+BEATS.push({id:'line',name:'The problem',dur:8000,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','A line still needs a person',160,170)),w2=words(tx(b,'t h','standing in it.',160,270));
+  const Y=620,S=64,YOU=3,qx=k=>300+k*150;
+  const ly=tx(b,'px glow','you, still here',qx(YOU)-40,Y+S+24);
+  const ld=tx(b,'px','the front desk',1560,Y+S+52);
+  const foot=tx(b,'i p','An agent can search and recommend. The waiting is still yours.',160,880,{fontSize:'32px'});
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,900,80,450);g.clearRect(0,0,1920,1080);
+    for(let k=0;k<8;k++){const p=eo(seg(ms,1500+k*90,400));if(p<=0)continue;block(g,qx(k),Y,S,S,k===YOU?GLOW:SOFT,(k===YOU?.9:.4)*p,6,2)}
+    box(g,1560,Y-36,200,S+72,PAPER,.9,eo(seg(ms,2000,700)));fade(ld,ms,2400,400);fade(ly,ms,2600,400);
+    // the clock over you: twelve dots, filling again and again
+    if(ms>2800){const nn=Math.floor((ms-2800)/200);const lit=nn<13?nn:Math.min(12,nn-13);const cxx=qx(YOU)+S/2,cyy=Y-90;
+      for(let k=0;k<12;k++){const a=-Math.PI/2+k*Math.PI/6;const on=k<lit;dot(g,cxx+Math.cos(a)*46-3,cyy+Math.sin(a)*46-3,on?GLOW:MUTE,on?.95:.5,on?6:4)}}
+    fade(foot,ms,5600,700)}}
+}});
+
+/* 04 the protocol as a deli ticket: the ticket draws itself, the number lands, five verbs print beside it */
+BEATS.push({id:'ticket',name:'The deli ticket',dur:12000,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','So your agent takes a ticket.',160,170));
+  const TX=160,TY=380,TW=460,TH=470;
+  const stub=tx(b,'px','TAKE A NUMBER',TX+34,TY+38,{letterSpacing:'.2em'});
+  const num=tx(b,'t','42',TX,TY+150,{width:TW+'px',textAlign:'center',fontSize:'230px',lineHeight:'1'});
+  const keep=tx(b,'mn','your agent keeps this',TX,TY+410,{width:TW+'px',textAlign:'center'});
+  const rows=[['take_ticket','join the line, get a number'],['position','how many are ahead of you'],['offer','a freed slot, held for you on a timer'],['accept / pass','take it, or skip it and keep your place'],['confirm','book it once, even if you say it twice']].map(([v,s],k)=>{
+    const y=TY+12+k*92;return [tx(b,'code',v,770,y),tx(b,'i',s,1130,y+6),y]});
+  return {seek(ms){riseWords(w1,ms,300,80,450);g.clearRect(0,0,1920,1080);
+    box(g,TX,TY,TW,TH,PAPER,.95,eio(seg(ms,1300,1100)));
+    const pf=eo(seg(ms,2200,500));if(pf>0)dline(g,TX+10,TY+100,TX+10+(TW-20)*pf,TY+100,SOFT,.8,10);
+    fade(stub,ms,2300,400);const np=eo(seg(ms,2700,600));num.style.opacity=np.toFixed(3);num.style.transform=`scale(${lerp(1.5,1,np).toFixed(3)})`;fade(keep,ms,3300,400);
+    rows.forEach(([v,s,y],k)=>{const a=4000+k*1400;const p=eo(seg(ms,a,500));v.style.opacity=p.toFixed(3);v.style.transform=`translateX(${lerp(-40,0,p).toFixed(1)}px)`;fade(s,ms,a+250,500);
+      if(p>0){dot(g,736,y+16,GLOW,p,10);dline(g,TX+TW,y+20,TX+TW+(736-TX-TW-10)*p,y+20,MUTE,.5*p,10)}})}}
+}});
+
+/* 05 the lease: a slot is held for one ticket while a row of dots empties; no answer, and it moves on */
+BEATS.push({id:'lease',name:'The lease',dur:10500,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','An offer is a lease.',160,170)),w2=words(tx(b,'t h','It runs out.',160,270));
+  const Y=650,S=96,qx=k=>260+k*420,SS=56;
+  const l0=tx(b,'px warn','no answer: a miss, place kept',qx(0),Y+S+24);
+  const l1=tx(b,'px glow','answers in time: held, then booked',qx(1),Y+S+24);
+  const foot=tx(b,'i p','The backend name: a queue with leases and visibility timeouts, spoken agent to agent.',160,890,{fontSize:'32px'});
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,1100,80,450);g.clearRect(0,0,1920,1080);
+    for(let k=0;k<4;k++){const p=eo(seg(ms,1600+k*100,400));const booked=k===1&&ms>=8000;block(g,qx(k),Y,S,S,booked?GLOW:SOFT,(booked?.95:.42)*p,booked?4:6,2)}
+    const sp=eo(seg(ms,2200,400));if(sp<=0)return;
+    const hop=eio(seg(ms,5400,800));const a=[qx(0)+S/2,Y-150],c=[qx(1)+S/2,Y-150];const [hx,hy]=quad(a[0],a[1],(a[0]+c[0])/2,Y-330,c[0],c[1],hop);
+    const sxx=hx-SS/2,syy=hy-SS/2;
+    if(hop>0)for(let k=0;k<=40;k++){const t=k/40;if(t>hop)break;const q=quad(a[0],a[1],(a[0]+c[0])/2,Y-330,c[0],c[1],t);dot(g,q[0],q[1],MUTE,.6,2)}
+    box(g,sxx,syy,SS,SS,GLOW,.95*sp,1);if(ms>=7400)block(g,sxx+6,syy+6,SS-12,SS-12,GLOW,.9,6,2);
+    if(ms>=2600)lease(g,a[0],Y-70,seg(ms,2600,2700),ms>=5300?WARN:GLOW);
+    if(ms>=6200)lease(g,c[0],Y-70,Math.min(.4,seg(ms,6200,3000)));
+    fade(l0,ms,5300,400);fade(l1,ms,7400,400);fade(foot,ms,8700,700)}}
+}});
+
+/* 06 two agents: two boxes draw themselves, messages run between them on two lanes */
+BEATS.push({id:'agents',name:'Two agents',dur:9500,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','Two agents.',160,170)),w2=words(tx(b,'t h','One line between them.',160,270));
+  const BY=470,BW=540,BH=300,LX=160,RX=1220;
+  const L=[tx(b,'px glow','LINE SITTER',LX+34,BY+34,{letterSpacing:'.2em'}),tx(b,'i p','one per person',LX+34,BY+92),tx(b,'i','holds their calendar and their',LX+34,BY+150),tx(b,'i','rules, in their own words',LX+34,BY+190)];
+  const R=[tx(b,'px glow','FRONT DESK',RX+34,BY+34,{letterSpacing:'.2em'}),tx(b,'i p','one per service',RX+34,BY+92),tx(b,'i','owns the schedule',RX+34,BY+150),tx(b,'i','and the line',RX+34,BY+190)];
+  const up=tx(b,'mn','take_ticket  accept  pass  confirm',LX+BW+40,BY+70);
+  const dn=tx(b,'mn','offer, with a lease',LX+BW+40,BY+222);
+  const foot=tx(b,'i p','The desk hears pass and a coarse code. It never sees the calendar.',160,880,{fontSize:'32px'});
+  const r=rng(11);const P=Array.from({length:16},()=>r());
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,900,80,450);g.clearRect(0,0,1920,1080);
+    box(g,LX,BY,BW,BH,PAPER,.9,eio(seg(ms,1700,900)));L.forEach((e,k)=>fade(e,ms,2100+k*200,400));
+    box(g,RX,BY,BW,BH,PAPER,.9,eio(seg(ms,3000,900)));R.forEach((e,k)=>fade(e,ms,3400+k*200,400));
+    const x0=LX+BW+20,x1=RX-20,T=ms/1000;
+    const a1=eo(seg(ms,4600,500)),a2=eo(seg(ms,6000,500));up.style.opacity=a1.toFixed(3);dn.style.opacity=a2.toFixed(3);
+    if(a1>0){dline(g,x0,BY+115,x1,BY+115,MUTE,.35*a1,12);P.forEach((ph,k)=>{if(k%2)return;const t=(ph+T*.22)%1;dot(g,lerp(x0,x1,t),BY+113,GLOW,.9*a1,6)})}
+    if(a2>0){dline(g,x0,BY+200,x1,BY+200,MUTE,.35*a2,12);P.forEach((ph,k)=>{if(!(k%2))return;const t=(ph+T*.22)%1;dot(g,lerp(x1,x0,t),BY+198,PAPER,.9*a2,6)})}
+    fade(foot,ms,7400,700)}}
+}});
+
+/* 07 the run in the demo: one freed slot goes down a line of three tickets. Mirrors docs/replay: Maria, 41 Dev, 42 Ana, 43 Sam */
+BEATS.push({id:'run',name:'The run',dur:13000,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','Maria cancels.',160,170)),w2=words(tx(b,'t h','The line moves on its own.',160,270));
+  const Y=640,S=110,X=[520,960,1400],SS=60;
+  const names=['41  Dev','42  Ana','43  Sam'].map((t,k)=>tx(b,'px',t,X[k],Y+S+22));
+  const st=[tx(b,'px warn','pass, keeps its place',X[0],Y+S+54),tx(b,'px glow','accept, confirm: booked',X[1],Y+S+54),tx(b,'px mute','still in line',X[2],Y+S+54)];
+  const sl=tx(b,'px','the freed slot',160,Y-52);
+  const foot=tx(b,'i p','Nobody refreshed a page. Nobody was put on hold.',160,900,{fontSize:'32px'});
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,1100,80,450);g.clearRect(0,0,1920,1080);
+    const booked=ms>=9400;
+    X.forEach((x,k)=>{const p=eo(seg(ms,1800+k*200,400));names[k].style.opacity=p.toFixed(3);const bk=k===1&&booked;block(g,x,Y,S,S,bk?GLOW:SOFT,(bk?.95:.42)*p,bk?4:6,2)});
+    const sp=eo(seg(ms,2800,400));sl.style.opacity=(sp*(1-seg(ms,3600,400))).toFixed(3);
+    if(sp>0){const m1=eio(seg(ms,3600,800)),m2=eio(seg(ms,6000,800)),drop=eio(seg(ms,9000,500));
+      const p0=[190,Y+S/2],p1=[X[0]+S/2,Y-120],p2=[X[1]+S/2,Y-120];
+      const A1=t=>quad(p0[0],p0[1],(p0[0]+p1[0])/2,Y-230,p1[0],p1[1],t),A2=t=>quad(p1[0],p1[1],(p1[0]+p2[0])/2,Y-270,p2[0],p2[1],t);
+      for(let k=0;k<=40;k++){const t=k/40;if(t<=m1){const q=A1(t);dot(g,q[0],q[1],MUTE,.6,2)}if(m2>0&&t<=m2){const q=A2(t);dot(g,q[0],q[1],MUTE,.6,2)}}
+      const pos=m2>0?A2(m2):A1(m1);const xx=pos[0]-SS/2,yy=pos[1]-SS/2;void drop;
+      box(g,xx,yy,SS,SS,GLOW,.95*sp,1);if(ms>=8000)block(g,xx+6,yy+6,SS-12,SS-12,GLOW,.9,6,2);
+      if(ms>=4400)lease(g,p1[0],Y-50,Math.min(.2,seg(ms,4400,6000)),ms>=5600?WARN:GLOW);
+      if(ms>=6800)lease(g,p2[0],Y-50,Math.min(.3,seg(ms,6800,6000)))}
+    fade(st[0],ms,5600,400);fade(st[1],ms,8000,400);fade(st[2],ms,10000,400);fade(foot,ms,10800,700)}}
+}});
+
+/* 08 idempotent confirm: two confirms travel to the desk; one booking square lights, once */
+BEATS.push({id:'once',name:'Books once',dur:8500,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','It confirms twice.',160,170)),w2=words(tx(b,'t h','It books once.',160,270));
+  const Y=600,S=110,AX=300,DX=1380,DW=340,DH=210;
+  const an=tx(b,'px','42  Ana',AX,Y+S+22);
+  const dk=tx(b,'px glow','FRONT DESK',DX+30,Y-50+28,{letterSpacing:'.2em'});
+  const c1=tx(b,'mn','confirm, key K',760,Y-150);const c2=tx(b,'mn','confirm, key K, sent again on purpose',700,Y+S+90);
+  const bk=tx(b,'px glow','one booking',DX+120,Y+62);
+  const foot=tx(b,'i p','A retry with the same key gets the same booking back.',160,900,{fontSize:'32px'});
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,1500,80,450);g.clearRect(0,0,1920,1080);
+    block(g,AX,Y,S,S,SOFT,.45*eo(seg(ms,1700,400)),6,2);fade(an,ms,1700,400);
+    box(g,DX,Y-50,DW,DH,PAPER,.9,eio(seg(ms,1900,800)));fade(dk,ms,2300,400);
+    const A=[AX+S+14,Y+S/2],B=[DX-14,Y+S/2];
+    [[2800,-190,c1,GLOW],[4700,190,c2,PAPER]].forEach(([t0,bend,lab,col])=>{const p=eio(seg(ms,t0,1200));fade(lab,ms,t0,400);if(p<=0)return;
+      for(let k=0;k<=60;k++){const t=k/60;if(t>p)break;const q=quad(A[0],A[1],(A[0]+B[0])/2,A[1]+bend,B[0],B[1],t);dot(g,q[0],q[1],SOFT,.8,3)}
+      if(p<1){const q=quad(A[0],A[1],(A[0]+B[0])/2,A[1]+bend,B[0],B[1],p);dot(g,q[0]-4,q[1]-4,col,1,10)}});
+    if(ms>=4000){block(g,DX+40,Y+50,56,56,GLOW,.95,4,2);const pulse=seg(ms,5900,700);if(pulse>0&&pulse<1)box(g,DX+40-12*pulse,Y+50-12*pulse,56+24*pulse,56+24*pulse,GLOW,1-pulse,1)}
+    fade(bk,ms,4000,400);fade(foot,ms,6600,700)}}
+}});
+
+/* 09 partner tools, as wired: a filled square is live, a half square is built but not live, a ring is not used */
+BEATS.push({id:'partners',name:'Partner tools',dur:9500,build(b){
+  const g=canvas(b);
+  const w1=words(tx(b,'t h','Partner tools, as wired today.',160,170));
+  const rows=PARTNERS.map((p,k)=>{const y=380+k*112;return [tx(b,'t m',p.name,220,y),tx(b,'i',p.what,720,y+16),tx(b,'px '+(p.mark==='real'?'glow':p.mark==='part'?'warn':'mute'),p.status,1380,y+22),y,p]});
+  const foot=tx(b,'i p','Each one says "simulated" on the page until its key is set.',160,890,{fontSize:'32px'});
+  return {seek(ms){riseWords(w1,ms,300,80,450);g.clearRect(0,0,1920,1080);
+    rows.forEach(([n,w,s,y,p],k)=>{const a=1600+k*1300;const q=eo(seg(ms,a,500));n.style.opacity=q.toFixed(3);n.style.transform=`translateX(${lerp(-40,0,q).toFixed(1)}px)`;fade(w,ms,a+250,500);fade(s,ms,a+600,500);
+      if(q<=0)return;const mx=164,my=y+18;
+      if(p.mark==='real')block(g,mx,my,28,28,GLOW,.95*q,4,2);
+      else if(p.mark==='part'){box(g,mx,my,28,28,WARN,.95*q,1);block(g,mx+2,my+14,26,14,WARN,.9*q,4,2)}
+      else drect(g,mx,my,28,28,MUTE,.8*q,7);
+      if(k>0)dline(g,160,y-22,1760,y-22,MUTE,.3*q,12)});
+    fade(foot,ms,7400,700)}}
+}});
+
+/* 10 the ask: one request, typed out, and the answer it gets */
+BEATS.push({id:'ask',name:'The ask',dur:9000,build(b){
+  const w1=words(tx(b,'t h','Point your agent',160,170)),w2=words(tx(b,'t h','at a front desk.',160,270));
+  const REQ='POST /desk/a2a/take_ticket';
+  const req=tx(b,'code glow','',160,500,{fontSize:'44px'});
+  const res=tx(b,'code','{ "ticket": 44, "position": 4, "lease_seconds": 60 }',160,580,{fontSize:'32px',color:'#a8b4c8'});
+  const a1=tx(b,'i p','It waits, so you do not.',160,720,{fontSize:'44px'});
+  const a2=tx(b,'i','The ask: tell us which line to open next, and send your agent to stand in it.',160,800,{fontSize:'32px'});
+  const m=tx(b,'mn','github.com/CarlKho-Minerva/take-a-number',160,900);
+  return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,900,80,450);
+    const n=Math.round(REQ.length*seg(ms,2000,1500));req.textContent=REQ.slice(0,n)+(n<REQ.length&&ms>=2000?'_':'');req.style.opacity=ms>=2000?'1':'0';
+    fade(res,ms,3900,500);fade(a1,ms,5000,600);fade(a2,ms,6200,600);fade(m,ms,7200,500)}}
+}});
+
+/* ---- presenter notes: every number lives here, never on a slide. Mirrors deck/NOTES.md ---- */
+const NOTES={
+title:['<b>0:00.</b> Say the plain sentence, nothing else: "Your agent waits in line for you, and the front desk\'s agent calls your number." Then go straight to the story.'],
+story:['<b>Told by the agent, not by Carl.</b> Read it as the agent\'s account. Facts only: 2026-09-28, he asked his agent to pick volunteer shifts for a conference. It recommended shifts and stopped, waiting for him to click. He went to sleep. By morning the three shifts he wanted were gone.','<b>Last line.</b> He wrote the rule down so no later agent would repeat it. That rule is the product: do not stop one step short of the line.'],
+line:['<b>The general case.</b> Clinics, the DMV, a restaurant, a volunteer roster. Finding the slot is solved. Standing in the line until one frees up is still a person refreshing a page.'],
+ticket:['<b>Five verbs, one ticket.</b> take_ticket returns a number, a position and a ticket secret. position says how many are ahead. offer is pushed by the desk to the agent\'s own URL. accept holds the slot, it does not book. pass gives the slot to the next ticket and keeps your place. confirm books and carries an idempotency key.','<b>Numbers.</b> Tickets start at 41 in the demo. One ticket per agent; asking twice returns the ticket you already hold.'],
+lease:['<b>The backend idea, named once.</b> A queue with leases and visibility timeouts. Default lease 60 s (the page can set 0.5 to 600 s). A sweeper checks every 250 ms. A lease that runs out is a miss; after 2 misses the ticket is marked no_show and leaves the line.','<b>Why a lease.</b> Without it one slow agent blocks the slot for everyone behind it.'],
+agents:['<b>Line Sitter.</b> One per person. The model may only use listed facts and must cite their ids; plain code checks every cited id and computes calendar overlaps itself. If the model is down the sitter never accepts on its own.','<b>Front Desk.</b> One per service. The model does one job there: turn a free-text cancellation into name, date, time. Matching against the schedule is plain code and must hit exactly one appointment, or it goes to staff.','<b>Privacy.</b> The reason sentence stays on the person\'s side. The desk gets pass plus a code such as schedule_conflict or declined.'],
+run:['<b>This is the demo.</b> Corner Clinic and its people are made up. Maria cancels 3:00 PM tomorrow. Ticket 41 (Dev) is presenting at a review that overlaps, so it passes and keeps its place. Ticket 42 (Ana) accepts and confirms. Ticket 43 (Sam) is still in line.','<b>What is real in it.</b> Real HTTP between the agents on one machine, real model calls, the real line code. Timings are in the page\'s log; read them off the screen, do not quote from memory.'],
+once:['<b>Idempotent confirm.</b> The demo sends confirm twice on purpose with the same key, 0.4 s apart. The second reply says replayed: true and returns the same booking id. The page counts bookings for the slot: 1.','<b>Tests.</b> The line rules have 25 unit tests with a clock that is moved by hand (count on 2026-10-11; rerun pytest before quoting it).'],
+partners:['<b>Say it straight.</b> Dial: the code speaks their documented send and webhook shapes; a real text goes out only when the key, a from number and a demo number are all set, otherwise the page says simulated. Darwin: the listing JSON and the two curl commands are generated; nothing is submitted. Keewano: the event log sits behind one small interface with a JSONL file today; KeewanoDB Local had no public install on 2026-10-11. Alike and Sparta: not used.','<b>If a key is set before the demo,</b> change the PARTNERS table at the top of deck/src.html and rebuild, so this slide never claims more than the page shows.'],
+ask:['<b>The ask.</b> One sentence: tell us which line to open next, and point your agent at it. One POST takes a ticket.','<b>If asked what is next.</b> A second front desk that is not a clinic, a real Dial number, and a public Darwin listing so other agents can find the line.']
+};
+
+/* ============ engine ============ */
+const PHONE=!PRINT&&!RENDER&&(innerWidth<900||(matchMedia('(pointer: coarse)').matches&&innerWidth<1100));
+const STATIC=PRINT||PHONE;
+const live=[];let starts=[],total=0;
+BEATS.forEach((bt,i)=>{const b=el('section','beat');b.id='b-'+bt.id;host.appendChild(b);const api=bt.build(b);
+  b.appendChild(el('span','wordmark wm','take a number<i>.</i>'));b.appendChild(el('span','pg',pad(i+1)+' / '+pad(BEATS.length)));
+  live.push({bt,b,api});starts.push(total);total+=bt.dur});
+window.DURATION_MS=total;window.BEAT_STARTS=starts;
+let cur=-1;
+function notesHtml(i){return (NOTES[live[i].bt.id]||[]).map(p=>'<p>'+p+'</p>').join('')}
+function showBeat(i){if(i===cur)return;if(cur>=0){live[cur].b.classList.remove('cur');if(live[cur].api.leave)live[cur].api.leave()}cur=i;live[i].b.classList.add('cur');if(live[i].api.enter)live[i].api.enter();
+  $('#hud').textContent=live[i].bt.name+' · N notes · arrows · A autoplay';
+  $('#drawer').innerHTML='<div class="k">'+pad(i+1)+' / '+pad(live.length)+' · '+live[i].bt.name+'</div>'+notesHtml(i)}
+/* global seek: ms on the whole timeline */
+function seekGlobal(ms){ms=clamp(ms,0,total-1);let i=0;while(i<live.length-1&&ms>=starts[i+1])i++;showBeat(i);live[i].api.seek(ms-starts[i]);$('#bar').style.width=(ms/total*1920).toFixed(1)+'px'}
+window.seek=seekGlobal;
+function fit(){stage.style.setProperty('--s',Math.min(innerWidth/1920,innerHeight/1080))}
+
+function stacked(cls){document.body.classList.add(cls);document.documentElement.classList.add(cls);
+  const draw=()=>live.forEach(o=>{if(o.api.enter)o.api.enter();o.api.seek(o.bt.dur-1)});
+  draw();return (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(draw)}
+if(PRINT){stacked('print').then(()=>{window.__ready=true});return}
+if(PHONE){const setK=()=>document.documentElement.style.setProperty('--k',innerWidth/1920);setK();addEventListener('resize',setK);
+  stacked('phone');live.forEach((o,i)=>{const d=el('div','pnotes','<div class="k">'+pad(i+1)+' / '+pad(live.length)+' · '+o.bt.name+'</div>'+notesHtml(i));o.b.insertAdjacentElement('afterend',d)});return}
+addEventListener('resize',fit);fit();
+if(RENDER){seekGlobal(+(Q.get('t')||0));(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{window.__ready=true});return}
+
+/* live: a beat plays from 0 when entered; Right = finish the beat, then next; Left = previous; Space = pause; A = autoplay; N = notes */
+let beat=0,t0=performance.now(),local=0,playing=true,auto=AUTOPLAY;
+function playBeat(i,from){beat=clamp(i,0,live.length-1);local=from||0;t0=performance.now()-local;playing=true;try{history.replaceState(null,'','#'+(beat+1))}catch(e){}}
+function tick(){const now=performance.now();if(playing)local=now-t0;const d=live[beat].bt.dur;
+  if(local>=d){if(auto&&beat<live.length-1){playBeat(beat+1,0)}else{local=d-1;playing=false}}
+  seekGlobal(starts[beat]+local);requestAnimationFrame(tick)}
+function finishOrNext(){if(local<live[beat].bt.dur-1){local=live[beat].bt.dur-1;t0=performance.now()-local;playing=false}else if(beat<live.length-1)playBeat(beat+1,0)}
+let digits='',dt=0;
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'){e.preventDefault();finishOrNext()}
+  else if(k===' '){e.preventDefault();if(local>=live[beat].bt.dur-1){if(beat<live.length-1)playBeat(beat+1,0)}else if(playing){playing=false}else{playing=true;t0=performance.now()-local}}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();playBeat(local>600?beat:beat-1,0)}
+  else if(k==='r'||k==='R'){playBeat(beat,0)}
+  else if(k==='a'||k==='A'){auto=!auto;playing=true;t0=performance.now()-local}
+  else if(k==='n'||k==='N'){document.body.classList.toggle('shownotes')}
+  else if(k==='Home'){playBeat(0,0)}
+  else if(k==='End'){playBeat(live.length-1,0)}
+  else if(/^[0-9]$/.test(k)){digits+=k;clearTimeout(dt);dt=setTimeout(()=>{const n=+digits||10;digits='';if(n>=1&&n<=live.length)playBeat(n-1,0)},500)}});
+addEventListener('click',e=>{if(e.target.closest('#drawer'))return;finishOrNext()});
+let txs=0;addEventListener('touchstart',e=>{txs=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-txs;if(dx<-60)playBeat(beat+1,0);else if(dx>60)playBeat(beat-1,0)});
+playBeat(clamp((parseInt((location.hash||'#1').slice(1),10)||1)-1,0,live.length-1),0);tick();
+})();
+</script>
+</body>
+</html>

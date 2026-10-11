@@ -1,1 +1,75 @@
-<!doctype html><title>take a number</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07070a">
+<title>Take a Number: a deli ticket, spoken between agents</title>
+<meta name="description" content="A front desk agent and three people's agents settle a cancelled appointment in seconds: ticket order, a 60 second lease, pass without losing your place, confirm that is safe to retry.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="tool">
+<div class="wrap">
+
+  <header class="mast">
+    <span class="wordmark">take a number<i>.</i></span>
+    <div class="modes">
+      <span id="modeStatus" class="st off">starting</span>
+      <button class="btn btn--ghost" id="modeReplay" aria-pressed="false">Replay</button>
+      <button class="btn btn--ghost" id="modeLive" aria-pressed="false">Live</button>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="verdict" id="verdict" aria-live="polite">Three people are in line.</h1>
+    <p class="lede" id="lede">A clinic's front desk agent and three people's agents. Someone cancels. Watch who gets the slot, and why.</p>
+
+    <div class="controls" id="controls"></div>
+
+    <div class="cols">
+      <section class="region" aria-labelledby="deskHead">
+        <div class="region-head"><span class="eyebrow" id="deskHead">Front desk</span><span id="deskStatus" class="st">open</span></div>
+        <div id="desk"></div>
+      </section>
+
+      <section class="region" aria-labelledby="lineHead">
+        <div class="region-head"><span class="eyebrow" id="lineHead">The line</span><span class="meta" id="lineMeta"></span></div>
+        <div class="tickets" id="tickets"></div>
+      </section>
+    </div>
+
+    <section class="region" aria-labelledby="countHead">
+      <div class="region-head"><span class="eyebrow" id="countHead">Waiting avoided, with the arithmetic</span><span class="meta" id="countMeta"></span></div>
+      <div class="readouts" id="readouts"></div>
+    </section>
+
+    <section class="region" aria-labelledby="wireHead">
+      <div class="region-head"><span class="eyebrow" id="wireHead">On the wire</span><span class="meta" id="wireMeta">0 messages</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>T (ms)</th><th>From</th><th>To</th><th>Message</th></tr></thead>
+          <tbody id="wire"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="wireEmpty">Nothing has been sent yet. Press a cancellation above to start.</p>
+    </section>
+
+    <section class="region" aria-labelledby="logHead">
+      <div class="region-head"><span class="eyebrow" id="logHead">Asked of the event log</span><span class="meta" id="logMeta"></span></div>
+      <div id="answer"><p class="empty">How long did the booked ticket wait, and why did the other one pass? The answer appears here once a slot is booked, read back from the log of events.</p></div>
+    </section>
+
+    <section class="region" aria-labelledby="partHead">
+      <div class="region-head"><span class="eyebrow" id="partHead">Partner tools in this run</span></div>
+      <div class="partners" id="partners"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p class="note">Built at SpeedHacks, 2026-10-11. The clinic, the schedule and the three people are invented. The line, the leases, the HTTP messages and the model calls are real when the page says Live, and a recording of a real run when it says Replay.
+      <a href="https://github.com/CarlKho-Minerva/take-a-number">Source and README</a>.</p>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

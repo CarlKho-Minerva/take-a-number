@@ -50,7 +50,10 @@ Rules:
 4. "reason" is one plain sentence, 25 words or fewer, written to the person as "you". Say the fact you
    relied on in ordinary words. Do not put fact ids (c1, e2) in the sentence; ids go in "evidence" only.
 5. "evidence" lists the ids of the facts you relied on. It must not be empty.
-6. "question" is null unless the decision is "escalate". Write it to the person, as "you".
+6. "question" is null unless the decision is "escalate". Write it to the person, as "you", in one
+   sentence that names the weekday and time of the slot and the thing you could not settle. Phrase it so
+   that YES means take the slot and NO means pass. Example of the shape: "Monday 9:30 AM is open but it
+   is before 10; is your knee follow-up urgent enough to take it?"
 
 Reply with JSON only:
 {"decision": "accept" | "pass" | "escalate", "reason": "...", "evidence": ["c1", "e1"], "question": null}"""
@@ -92,6 +95,7 @@ class Decision:
     source: str  # model | code | guard | human
     model: str | None = None
     ms: int | None = None
+    detail: str | None = None  # for the log, not for the person
 
     def public(self) -> dict[str, Any]:
         return vars(self).copy()
@@ -208,7 +212,9 @@ def decide_without_model(overlaps: list[CalendarEvent], slot: dict[str, Any], wh
             None,
             "code",
         )
-    return Decision("escalate", f"The model did not answer ({why}), so I am asking you.", [], default_question(slot), "code")
+    decision = Decision("escalate", "The model did not answer, so I am asking you instead of guessing.", [], default_question(slot), "code")
+    decision.detail = why
+    return decision
 
 
 Notifier = Callable[[Person, str, dict[str, Any]], Awaitable[dict[str, Any]]]
@@ -293,7 +299,7 @@ class LineSitter:
         try:
             result = await llm.complete_json(SYSTEM_PROMPT, user)
         except llm.LLMUnavailable as exc:
-            return decide_without_model(overlaps, slot, str(exc)[:80] or "no reply")
+            return decide_without_model(overlaps, slot, str(exc)[:200] or "no reply")
         decision = guard(result.data, facts, overlaps, slot)
         decision.model = result.model
         decision.ms = result.ms

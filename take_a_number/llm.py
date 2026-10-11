@@ -60,7 +60,7 @@ async def _gemini(client: httpx.AsyncClient, system: str, user: str) -> tuple[st
     gen: dict[str, Any] = {
         "temperature": 0,
         "responseMimeType": "application/json",
-        "maxOutputTokens": 400,
+        "maxOutputTokens": 1024,
         "thinkingConfig": {"thinkingBudget": 0},
     }
     for attempt in (1, 2):
@@ -103,7 +103,7 @@ async def _openai(client: httpx.AsyncClient, system: str, user: str) -> tuple[st
 async def _azure(client: httpx.AsyncClient, system: str, user: str) -> tuple[str, str]:
     key = config.get("AZURE_OPENAI_API_KEY")
     base = config.get("AZURE_OPENAI_BASE_URL").rstrip("/")
-    model = config.get("TAN_AZURE_DEPLOYMENT") or "gpt-4o-mini"
+    model = config.get("TAN_AZURE_DEPLOYMENT") or "gpt-5-mini"
     r = await client.post(
         f"{base}/chat/completions",
         headers={"api-key": key, "Authorization": f"Bearer {key}"},
@@ -137,7 +137,7 @@ _CALLS = {"gemini": _gemini, "openai": _openai, "azure": _azure}
 
 
 async def complete_json(system: str, user: str, timeout_s: float = TIMEOUT_S) -> LLMResult:
-    """Ask for a JSON object. Tries each provider that has a key, once."""
+    """Ask for a JSON object. Tries each provider that has a key, in order."""
     if FORCE_UNAVAILABLE:
         raise LLMUnavailable("model outage simulated by the demo switch")
     errors: list[str] = []
@@ -146,16 +146,19 @@ async def complete_json(system: str, user: str, timeout_s: float = TIMEOUT_S) ->
         raise LLMUnavailable("no model key is set")
     async with httpx.AsyncClient(timeout=timeout_s) as client:
         for name in names:
-            started = time.perf_counter()
-            try:
-                text, model = await _CALLS[name](client, system, user)
-                data = _loads(text)
-            except httpx.TimeoutException:
-                errors.append(f"{name}: timed out after {timeout_s:.0f}s")
-                continue
-            except Exception as exc:  # status errors, bad JSON, missing fields
-                errors.append(f"{name}: {type(exc).__name__}: {str(exc)[:80]}")
-                continue
-            ms = int((time.perf_counter() - started) * 1000)
-            return LLMResult(data=data, provider=name, model=model, ms=ms)
+            # The first provider gets one second try: a model that returns a cut-off
+            # reply once usually answers properly the next time.
+            for attempt in range(2 if name == names[0] else 1):
+                started = time.perf_counter()
+                try:
+                    text, model = await _CALLS[name](client, system, user)
+                    data = _loads(text)
+                except httpx.TimeoutException:
+                    errors.append(f"{name}: timed out after {timeout_s:.0f}s")
+                    break  # do not spend another full timeout on the same provider
+                except Exception as exc:  # status errors, bad JSON, missing fields
+                    errors.append(f"{name}: {type(exc).__name__}: {str(exc)[:80]}")
+                    continue
+                ms = int((time.perf_counter() - started) * 1000)
+                return LLMResult(data=data, provider=name, model=model, ms=ms)
     raise LLMUnavailable("; ".join(errors))

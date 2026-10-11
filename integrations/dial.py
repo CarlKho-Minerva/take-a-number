@@ -32,6 +32,7 @@ import hashlib
 import hmac
 import os
 import time
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -54,9 +55,16 @@ def mask(number: str) -> str:
     return f"***{number[-4:]}" if len(number) >= 4 else "***"
 
 
-def question_text(question: str, lease_seconds: float | int | None) -> str:
-    held = f" Held for {int(lease_seconds)} seconds." if lease_seconds else ""
-    return f"Take a Number: {question}{held} Reply Y or N."[:300]
+def question_text(question: str, offer: dict[str, Any]) -> str:
+    """One text: what opened, how long it is held, the one question, how to answer."""
+    slot = offer.get("slot") or {}
+    opened = ""
+    if slot.get("start"):
+        start = datetime.fromisoformat(slot["start"])
+        opened = f"{slot.get('where', 'The front desk')}: {start.strftime('%a %-I:%M %p')} opened up"
+        lease = offer.get("lease_seconds")
+        opened += f", held for {int(lease)} seconds. " if lease else ". "
+    return f"{opened}{question} Reply Y to take it, N to pass."[:320]
 
 
 async def send_text(body: str) -> dict[str, Any]:
@@ -84,7 +92,7 @@ async def send_text(body: str) -> dict[str, Any]:
 
 async def ask_yes_no(person: Any, question: str, offer: dict[str, Any]) -> dict[str, Any]:
     """The Line Sitter's notifier. `person` is only used for the greeting; no calendar data is sent."""
-    return await send_text(question_text(question, offer.get("lease_seconds")))
+    return await send_text(question_text(question, offer))
 
 
 def verify_signature(raw_body: bytes, header: str, secret: str, max_age_s: int = 300, now: float | None = None) -> bool:

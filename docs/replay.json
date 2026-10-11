@@ -1,0 +1,1663 @@
+{
+ "recorded_at": "2026-10-11 10:41 PDT",
+ "note": "Real LIVE runs: real HTTP between the agents on one machine, real model calls. Saved by scripts/record.py, not edited.",
+ "runs": [
+  {
+   "id": "maria-3pm",
+   "label": "Maria cancels 3:00 PM",
+   "text": "hi this is Maria I can't make my 3pm tomorrow",
+   "lease_seconds": 60,
+   "events": [
+    {
+     "seq": 1,
+     "t_ms": 0,
+     "type": "reset",
+     "actor": "demo",
+     "clinic": "Corner Clinic",
+     "today": "2026-10-11",
+     "schedule": [
+      {
+       "slot_id": "2026-10-12-0930",
+       "start": "2026-10-12T09:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Tom B.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1100",
+       "start": "2026-10-12T11:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Priya S.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1330",
+       "start": "2026-10-12T13:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Luis G.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1500",
+       "start": "2026-10-12T15:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Maria R.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1600",
+       "start": "2026-10-12T16:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Wen L.",
+       "status": "booked"
+      }
+     ],
+     "people": [
+      {
+       "id": "dev",
+       "name": "Dev",
+       "visit_reason": "knee follow-up",
+       "constraints": [
+        "Never move a meeting I am presenting at.",
+        "No mornings before 10 unless it is urgent."
+       ],
+       "calendar": [
+        {
+         "title": "Quarterly review (presenting)",
+         "start": "2026-10-12T14:30",
+         "end": "2026-10-12T16:00"
+        }
+       ],
+       "current_appointment": "2026-10-23T10:30"
+      },
+      {
+       "id": "ana",
+       "name": "Ana",
+       "visit_reason": "annual checkup",
+       "constraints": [
+        "No mornings before 10 unless it is urgent.",
+        "I need 40 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Team lunch",
+         "start": "2026-10-12T12:30",
+         "end": "2026-10-12T13:30"
+        },
+        {
+         "title": "School pickup",
+         "start": "2026-10-12T17:00",
+         "end": "2026-10-12T17:30"
+        }
+       ],
+       "current_appointment": "2026-10-20T14:00"
+      },
+      {
+       "id": "sam",
+       "name": "Sam",
+       "visit_reason": "blood pressure check",
+       "constraints": [
+        "Any time of day works.",
+        "I need 20 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Gym",
+         "start": "2026-10-12T07:00",
+         "end": "2026-10-12T08:00"
+        }
+       ],
+       "current_appointment": "2026-10-26T09:00"
+      }
+     ],
+     "lease_seconds": 60.0,
+     "max_misses": 2,
+     "integrations": {
+      "dial": {
+       "tool": "Dial",
+       "simulated": true,
+       "missing": [
+        "DIAL_API_KEY",
+        "DIAL_FROM_NUMBER",
+        "DEMO_TO_NUMBER"
+       ],
+       "inbound_verified": false
+      },
+      "darwin": {
+       "tool": "Darwin",
+       "simulated": true,
+       "listed": false,
+       "has_key": false,
+       "note": "Listing file and commands are generated; nothing is submitted by this code."
+      },
+      "keewano": {
+       "tool": "Keewano",
+       "simulated": true,
+       "backend": "jsonl",
+       "note": "JSONL event log behind the EventLog interface. KeewanoDB Local was not publicly installable on 2026-10-11."
+      }
+     },
+     "model_providers": [
+      "gemini",
+      "openai",
+      "azure"
+     ],
+     "model_forced_off": false
+    },
+    {
+     "seq": 2,
+     "t_ms": 18,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 41,
+     "label": "Dev",
+     "position": 1,
+     "agent_url": "http://127.0.0.1:8041/sitters/dev"
+    },
+    {
+     "seq": 3,
+     "t_ms": 22,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 42,
+     "label": "Ana",
+     "position": 2,
+     "agent_url": "http://127.0.0.1:8041/sitters/ana"
+    },
+    {
+     "seq": 4,
+     "t_ms": 26,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 43,
+     "label": "Sam",
+     "position": 3,
+     "agent_url": "http://127.0.0.1:8041/sitters/sam"
+    },
+    {
+     "seq": 5,
+     "t_ms": 28,
+     "type": "cancellation_received",
+     "actor": "desk",
+     "text": "hi this is Maria I can't make my 3pm tomorrow",
+     "channel": "page"
+    },
+    {
+     "seq": 6,
+     "t_ms": 1061,
+     "type": "cancellation_parsed",
+     "actor": "desk",
+     "parsed": {
+      "intent": "cancel",
+      "patient_name": "Maria",
+      "date": "2026-10-12",
+      "time": "15:00"
+     },
+     "model": "gemini-3.8-flash",
+     "ms": 1030
+    },
+    {
+     "seq": 7,
+     "t_ms": 1062,
+     "type": "slot_freed",
+     "actor": "desk",
+     "slot": {
+      "slot_id": "2026-10-12-1500",
+      "start": "2026-10-12T15:00",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "freed_from": "Maria R."
+    },
+    {
+     "seq": 8,
+     "t_ms": 1062,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 41",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot": {
+      "slot_id": "2026-10-12-1500",
+      "start": "2026-10-12T15:00",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 60.0
+    },
+    {
+     "seq": 9,
+     "t_ms": 1069,
+     "type": "deciding",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1"
+    },
+    {
+     "seq": 10,
+     "t_ms": 2171,
+     "type": "decision",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "decision": "pass",
+     "reason": "The offered slot overlaps with your quarterly review presentation, which you cannot move.",
+     "evidence": [
+      "c1",
+      "e1",
+      "e2"
+     ],
+     "question": null,
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1099
+    },
+    {
+     "seq": 11,
+     "t_ms": 2175,
+     "type": "passed",
+     "actor": "desk",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot_id": "2026-10-12-1500",
+     "reason_code": "schedule_conflict",
+     "position": 1
+    },
+    {
+     "seq": 12,
+     "t_ms": 2175,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 42",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot": {
+      "slot_id": "2026-10-12-1500",
+      "start": "2026-10-12T15:00",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 60.0
+    },
+    {
+     "seq": 13,
+     "t_ms": 2179,
+     "type": "wire",
+     "actor": "sitter:dev",
+     "to": "desk",
+     "verb": "pass",
+     "ticket": 41,
+     "request": {
+      "offer_id": "offer-1",
+      "reason_code": "schedule_conflict"
+     },
+     "status": 200,
+     "response": {
+      "status": "passed",
+      "position": 1,
+      "kept_place": true
+     }
+    },
+    {
+     "seq": 14,
+     "t_ms": 2179,
+     "type": "deciding",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2"
+    },
+    {
+     "seq": 15,
+     "t_ms": 3218,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "accept",
+     "reason": "The afternoon slot gives you 90 minutes beforehand, which is more than the 40 minutes of travel time you need.",
+     "evidence": [
+      "c2",
+      "e1",
+      "e2"
+     ],
+     "question": null,
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1035
+    },
+    {
+     "seq": 16,
+     "t_ms": 3221,
+     "type": "held",
+     "actor": "desk",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot_id": "2026-10-12-1500"
+    },
+    {
+     "seq": 17,
+     "t_ms": 3222,
+     "type": "wire",
+     "actor": "sitter:ana",
+     "to": "desk",
+     "verb": "accept",
+     "ticket": 42,
+     "request": {
+      "offer_id": "offer-2"
+     },
+     "status": 200,
+     "response": {
+      "status": "held",
+      "offer_id": "offer-2",
+      "slot_id": "2026-10-12-1500"
+     }
+    },
+    {
+     "seq": 18,
+     "t_ms": 3226,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot_id": "2026-10-12-1500",
+     "booking_id": "booking-1",
+     "replayed": false,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      43
+     ]
+    },
+    {
+     "seq": 19,
+     "t_ms": 3226,
+     "type": "wire",
+     "actor": "sitter:ana",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 42,
+     "request": {
+      "offer_id": "offer-2",
+      "idempotency_key": "ana-offer-2-ticket-42"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-1500",
+      "replayed": false
+     },
+     "attempt": 1,
+     "retry_on_purpose": false
+    },
+    {
+     "seq": 20,
+     "t_ms": 3632,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot_id": "2026-10-12-1500",
+     "booking_id": "booking-1",
+     "replayed": true,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      43
+     ]
+    },
+    {
+     "seq": 21,
+     "t_ms": 3633,
+     "type": "wire",
+     "actor": "sitter:ana",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 42,
+     "request": {
+      "offer_id": "offer-2",
+      "idempotency_key": "ana-offer-2-ticket-42"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-1500",
+      "replayed": true
+     },
+     "attempt": 2,
+     "retry_on_purpose": true
+    }
+   ],
+   "answer": {
+    "backend": "jsonl",
+    "simulated_keewano": true,
+    "events_read": 21,
+    "served": {
+     "ticket": 42,
+     "wait_s": 3.2,
+     "answer": "Ticket 42 waited 3.2 s in line, from taking the ticket (event 3) to the booking (event 18). The slot came free at event 7 and was booked 2.2 s later. Its own offer took 1.1 s from offer (event 12) to booking.",
+     "evidence_seq": [
+      3,
+      7,
+      12,
+      18
+     ]
+    },
+    "passed": {
+     "ticket": 41,
+     "answer": "Ticket 41 passed because: The offered slot overlaps with your quarterly review presentation, which you cannot move. (event 10, decided by model). It kept its place (position 1).",
+     "evidence_seq": [
+      10,
+      11
+     ]
+    }
+   }
+  },
+  {
+   "id": "tom-930",
+   "label": "Tom cancels 9:30 AM (agents must ask)",
+   "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
+   "lease_seconds": 60,
+   "events": [
+    {
+     "seq": 1,
+     "t_ms": 0,
+     "type": "reset",
+     "actor": "demo",
+     "clinic": "Corner Clinic",
+     "today": "2026-10-11",
+     "schedule": [
+      {
+       "slot_id": "2026-10-12-0930",
+       "start": "2026-10-12T09:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Tom B.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1100",
+       "start": "2026-10-12T11:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Priya S.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1330",
+       "start": "2026-10-12T13:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Luis G.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1500",
+       "start": "2026-10-12T15:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Maria R.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1600",
+       "start": "2026-10-12T16:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Wen L.",
+       "status": "booked"
+      }
+     ],
+     "people": [
+      {
+       "id": "dev",
+       "name": "Dev",
+       "visit_reason": "knee follow-up",
+       "constraints": [
+        "Never move a meeting I am presenting at.",
+        "No mornings before 10 unless it is urgent."
+       ],
+       "calendar": [
+        {
+         "title": "Quarterly review (presenting)",
+         "start": "2026-10-12T14:30",
+         "end": "2026-10-12T16:00"
+        }
+       ],
+       "current_appointment": "2026-10-23T10:30"
+      },
+      {
+       "id": "ana",
+       "name": "Ana",
+       "visit_reason": "annual checkup",
+       "constraints": [
+        "No mornings before 10 unless it is urgent.",
+        "I need 40 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Team lunch",
+         "start": "2026-10-12T12:30",
+         "end": "2026-10-12T13:30"
+        },
+        {
+         "title": "School pickup",
+         "start": "2026-10-12T17:00",
+         "end": "2026-10-12T17:30"
+        }
+       ],
+       "current_appointment": "2026-10-20T14:00"
+      },
+      {
+       "id": "sam",
+       "name": "Sam",
+       "visit_reason": "blood pressure check",
+       "constraints": [
+        "Any time of day works.",
+        "I need 20 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Gym",
+         "start": "2026-10-12T07:00",
+         "end": "2026-10-12T08:00"
+        }
+       ],
+       "current_appointment": "2026-10-26T09:00"
+      }
+     ],
+     "lease_seconds": 60.0,
+     "max_misses": 2,
+     "integrations": {
+      "dial": {
+       "tool": "Dial",
+       "simulated": true,
+       "missing": [
+        "DIAL_API_KEY",
+        "DIAL_FROM_NUMBER",
+        "DEMO_TO_NUMBER"
+       ],
+       "inbound_verified": false
+      },
+      "darwin": {
+       "tool": "Darwin",
+       "simulated": true,
+       "listed": false,
+       "has_key": false,
+       "note": "Listing file and commands are generated; nothing is submitted by this code."
+      },
+      "keewano": {
+       "tool": "Keewano",
+       "simulated": true,
+       "backend": "jsonl",
+       "note": "JSONL event log behind the EventLog interface. KeewanoDB Local was not publicly installable on 2026-10-11."
+      }
+     },
+     "model_providers": [
+      "gemini",
+      "openai",
+      "azure"
+     ],
+     "model_forced_off": false
+    },
+    {
+     "seq": 2,
+     "t_ms": 4,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 41,
+     "label": "Dev",
+     "position": 1,
+     "agent_url": "http://127.0.0.1:8041/sitters/dev"
+    },
+    {
+     "seq": 3,
+     "t_ms": 8,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 42,
+     "label": "Ana",
+     "position": 2,
+     "agent_url": "http://127.0.0.1:8041/sitters/ana"
+    },
+    {
+     "seq": 4,
+     "t_ms": 12,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 43,
+     "label": "Sam",
+     "position": 3,
+     "agent_url": "http://127.0.0.1:8041/sitters/sam"
+    },
+    {
+     "seq": 5,
+     "t_ms": 14,
+     "type": "cancellation_received",
+     "actor": "desk",
+     "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
+     "channel": "page"
+    },
+    {
+     "seq": 6,
+     "t_ms": 1396,
+     "type": "cancellation_parsed",
+     "actor": "desk",
+     "parsed": {
+      "intent": "cancel",
+      "patient_name": "Tom",
+      "date": "2026-10-12",
+      "time": "09:30"
+     },
+     "model": "gemini-3.8-flash",
+     "ms": 1379
+    },
+    {
+     "seq": 7,
+     "t_ms": 1396,
+     "type": "slot_freed",
+     "actor": "desk",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "freed_from": "Tom B."
+    },
+    {
+     "seq": 8,
+     "t_ms": 1396,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 41",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 60.0
+    },
+    {
+     "seq": 9,
+     "t_ms": 1400,
+     "type": "deciding",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1"
+    },
+    {
+     "seq": 10,
+     "t_ms": 2645,
+     "type": "decision",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "decision": "escalate",
+     "reason": "The offered slot is before 10 AM, and it is not specified whether your knee follow-up is urgent.",
+     "evidence": [
+      "c2",
+      "e1",
+      "t1"
+     ],
+     "question": "The offered slot is Monday 2026-10-12 at 9:30 AM; is this visit urgent?",
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1241
+    },
+    {
+     "seq": 11,
+     "t_ms": 2645,
+     "type": "escalation",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "question": "The offered slot is Monday 2026-10-12 at 9:30 AM; is this visit urgent?",
+     "lease_seconds": 60.0,
+     "delivery": {
+      "channel": "sms",
+      "simulated": true,
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. The offered slot is Monday 2026-10-12 at 9:30 AM; is this visit urgent? Reply Y to take it, N to pass.",
+      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
+     }
+    },
+    {
+     "seq": 12,
+     "t_ms": 4737,
+     "type": "human_answer",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "answer": "no"
+    },
+    {
+     "seq": 13,
+     "t_ms": 4737,
+     "type": "decision",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "decision": "pass",
+     "reason": "Dev answered no.",
+     "evidence": [],
+     "question": null,
+     "source": "human",
+     "model": null,
+     "ms": null
+    },
+    {
+     "seq": 14,
+     "t_ms": 4752,
+     "type": "passed",
+     "actor": "desk",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot_id": "2026-10-12-0930",
+     "reason_code": "declined",
+     "position": 1
+    },
+    {
+     "seq": 15,
+     "t_ms": 4752,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 42",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 60.0
+    },
+    {
+     "seq": 16,
+     "t_ms": 4761,
+     "type": "wire",
+     "actor": "sitter:dev",
+     "to": "desk",
+     "verb": "pass",
+     "ticket": 41,
+     "request": {
+      "offer_id": "offer-1",
+      "reason_code": "declined"
+     },
+     "status": 200,
+     "response": {
+      "status": "passed",
+      "position": 1,
+      "kept_place": true
+     }
+    },
+    {
+     "seq": 17,
+     "t_ms": 4763,
+     "type": "deciding",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2"
+    },
+    {
+     "seq": 18,
+     "t_ms": 8107,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "escalate",
+     "reason": "You prefer not to have appointments before 10 AM unless urgent, and it is unclear if your annual checkup counts as urgent.",
+     "evidence": [
+      "c1",
+      "e1",
+      "t1"
+     ],
+     "question": "Is your annual checkup urgent enough to take the appointment on Monday, October 12, 2026, at 9:30 AM?",
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 3337
+    },
+    {
+     "seq": 19,
+     "t_ms": 8107,
+     "type": "escalation",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "question": "Is your annual checkup urgent enough to take the appointment on Monday, October 12, 2026, at 9:30 AM?",
+     "lease_seconds": 60.0,
+     "delivery": {
+      "channel": "sms",
+      "simulated": true,
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 60 seconds. Is your annual checkup urgent enough to take the appointment on Monday, October 12, 2026, at 9:30 AM? Reply Y to take it, N to pass.",
+      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
+     }
+    },
+    {
+     "seq": 20,
+     "t_ms": 10069,
+     "type": "human_answer",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "answer": "no"
+    },
+    {
+     "seq": 21,
+     "t_ms": 10069,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "pass",
+     "reason": "Ana answered no.",
+     "evidence": [],
+     "question": null,
+     "source": "human",
+     "model": null,
+     "ms": null
+    },
+    {
+     "seq": 22,
+     "t_ms": 10083,
+     "type": "passed",
+     "actor": "desk",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot_id": "2026-10-12-0930",
+     "reason_code": "declined",
+     "position": 2
+    },
+    {
+     "seq": 23,
+     "t_ms": 10083,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 43",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 60.0
+    },
+    {
+     "seq": 24,
+     "t_ms": 10091,
+     "type": "wire",
+     "actor": "sitter:ana",
+     "to": "desk",
+     "verb": "pass",
+     "ticket": 42,
+     "request": {
+      "offer_id": "offer-2",
+      "reason_code": "declined"
+     },
+     "status": 200,
+     "response": {
+      "status": "passed",
+      "position": 2,
+      "kept_place": true
+     }
+    },
+    {
+     "seq": 25,
+     "t_ms": 10093,
+     "type": "deciding",
+     "actor": "sitter:sam",
+     "ticket": 43,
+     "offer_id": "offer-3"
+    },
+    {
+     "seq": 26,
+     "t_ms": 11206,
+     "type": "decision",
+     "actor": "sitter:sam",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "decision": "accept",
+     "reason": "Any time works for you and you have 90 free minutes before the slot, easily covering your 20-minute travel time.",
+     "evidence": [
+      "c1",
+      "c2",
+      "e1",
+      "e2"
+     ],
+     "question": null,
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1108
+    },
+    {
+     "seq": 27,
+     "t_ms": 11217,
+     "type": "held",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930"
+    },
+    {
+     "seq": 28,
+     "t_ms": 11218,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "accept",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3"
+     },
+     "status": 200,
+     "response": {
+      "status": "held",
+      "offer_id": "offer-3",
+      "slot_id": "2026-10-12-0930"
+     }
+    },
+    {
+     "seq": 29,
+     "t_ms": 11226,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930",
+     "booking_id": "booking-1",
+     "replayed": false,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      42
+     ]
+    },
+    {
+     "seq": 30,
+     "t_ms": 11227,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3",
+      "idempotency_key": "sam-offer-3-ticket-43"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-0930",
+      "replayed": false
+     },
+     "attempt": 1,
+     "retry_on_purpose": false
+    },
+    {
+     "seq": 31,
+     "t_ms": 11642,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930",
+     "booking_id": "booking-1",
+     "replayed": true,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      42
+     ]
+    },
+    {
+     "seq": 32,
+     "t_ms": 11643,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3",
+      "idempotency_key": "sam-offer-3-ticket-43"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-0930",
+      "replayed": true
+     },
+     "attempt": 2,
+     "retry_on_purpose": true
+    }
+   ],
+   "answer": {
+    "backend": "jsonl",
+    "simulated_keewano": true,
+    "events_read": 32,
+    "served": {
+     "ticket": 43,
+     "wait_s": 11.2,
+     "answer": "Ticket 43 waited 11.2 s in line, from taking the ticket (event 4) to the booking (event 29). The slot came free at event 7 and was booked 9.8 s later. Its own offer took 1.1 s from offer (event 23) to booking.",
+     "evidence_seq": [
+      4,
+      7,
+      23,
+      29
+     ]
+    },
+    "passed": {
+     "ticket": 41,
+     "answer": "Ticket 41 passed because: Dev answered no. (event 13, decided by human). It kept its place (position 1). Ticket 42 passed because: Ana answered no. (event 21, decided by human). It kept its place (position 2).",
+     "evidence_seq": [
+      13,
+      14,
+      21,
+      22
+     ]
+    }
+   }
+  },
+  {
+   "id": "lease-out",
+   "label": "Nobody answers: the lease runs out",
+   "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
+   "lease_seconds": 10,
+   "events": [
+    {
+     "seq": 1,
+     "t_ms": 0,
+     "type": "reset",
+     "actor": "demo",
+     "clinic": "Corner Clinic",
+     "today": "2026-10-11",
+     "schedule": [
+      {
+       "slot_id": "2026-10-12-0930",
+       "start": "2026-10-12T09:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Tom B.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1100",
+       "start": "2026-10-12T11:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Priya S.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1330",
+       "start": "2026-10-12T13:30",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Luis G.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1500",
+       "start": "2026-10-12T15:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Maria R.",
+       "status": "booked"
+      },
+      {
+       "slot_id": "2026-10-12-1600",
+       "start": "2026-10-12T16:00",
+       "minutes": 30,
+       "with": "Dr. Okafor",
+       "patient": "Wen L.",
+       "status": "booked"
+      }
+     ],
+     "people": [
+      {
+       "id": "dev",
+       "name": "Dev",
+       "visit_reason": "knee follow-up",
+       "constraints": [
+        "Never move a meeting I am presenting at.",
+        "No mornings before 10 unless it is urgent."
+       ],
+       "calendar": [
+        {
+         "title": "Quarterly review (presenting)",
+         "start": "2026-10-12T14:30",
+         "end": "2026-10-12T16:00"
+        }
+       ],
+       "current_appointment": "2026-10-23T10:30"
+      },
+      {
+       "id": "ana",
+       "name": "Ana",
+       "visit_reason": "annual checkup",
+       "constraints": [
+        "No mornings before 10 unless it is urgent.",
+        "I need 40 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Team lunch",
+         "start": "2026-10-12T12:30",
+         "end": "2026-10-12T13:30"
+        },
+        {
+         "title": "School pickup",
+         "start": "2026-10-12T17:00",
+         "end": "2026-10-12T17:30"
+        }
+       ],
+       "current_appointment": "2026-10-20T14:00"
+      },
+      {
+       "id": "sam",
+       "name": "Sam",
+       "visit_reason": "blood pressure check",
+       "constraints": [
+        "Any time of day works.",
+        "I need 20 minutes to get there."
+       ],
+       "calendar": [
+        {
+         "title": "Gym",
+         "start": "2026-10-12T07:00",
+         "end": "2026-10-12T08:00"
+        }
+       ],
+       "current_appointment": "2026-10-26T09:00"
+      }
+     ],
+     "lease_seconds": 10.0,
+     "max_misses": 2,
+     "integrations": {
+      "dial": {
+       "tool": "Dial",
+       "simulated": true,
+       "missing": [
+        "DIAL_API_KEY",
+        "DIAL_FROM_NUMBER",
+        "DEMO_TO_NUMBER"
+       ],
+       "inbound_verified": false
+      },
+      "darwin": {
+       "tool": "Darwin",
+       "simulated": true,
+       "listed": false,
+       "has_key": false,
+       "note": "Listing file and commands are generated; nothing is submitted by this code."
+      },
+      "keewano": {
+       "tool": "Keewano",
+       "simulated": true,
+       "backend": "jsonl",
+       "note": "JSONL event log behind the EventLog interface. KeewanoDB Local was not publicly installable on 2026-10-11."
+      }
+     },
+     "model_providers": [
+      "gemini",
+      "openai",
+      "azure"
+     ],
+     "model_forced_off": false
+    },
+    {
+     "seq": 2,
+     "t_ms": 14,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 41,
+     "label": "Dev",
+     "position": 1,
+     "agent_url": "http://127.0.0.1:8041/sitters/dev"
+    },
+    {
+     "seq": 3,
+     "t_ms": 23,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 42,
+     "label": "Ana",
+     "position": 2,
+     "agent_url": "http://127.0.0.1:8041/sitters/ana"
+    },
+    {
+     "seq": 4,
+     "t_ms": 27,
+     "type": "ticket_taken",
+     "actor": "desk",
+     "ticket": 43,
+     "label": "Sam",
+     "position": 3,
+     "agent_url": "http://127.0.0.1:8041/sitters/sam"
+    },
+    {
+     "seq": 5,
+     "t_ms": 28,
+     "type": "cancellation_received",
+     "actor": "desk",
+     "text": "This is Tom. Something came up, please cancel my 9:30 tomorrow morning.",
+     "channel": "page"
+    },
+    {
+     "seq": 6,
+     "t_ms": 1009,
+     "type": "cancellation_parsed",
+     "actor": "desk",
+     "parsed": {
+      "intent": "cancel",
+      "patient_name": "Tom",
+      "date": "2026-10-12",
+      "time": "09:30"
+     },
+     "model": "gemini-3.8-flash",
+     "ms": 978
+    },
+    {
+     "seq": 7,
+     "t_ms": 1010,
+     "type": "slot_freed",
+     "actor": "desk",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "freed_from": "Tom B."
+    },
+    {
+     "seq": 8,
+     "t_ms": 1010,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 41",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 10.0
+    },
+    {
+     "seq": 9,
+     "t_ms": 1025,
+     "type": "deciding",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1"
+    },
+    {
+     "seq": 10,
+     "t_ms": 5324,
+     "type": "decision",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "decision": "escalate",
+     "reason": "The model did not answer (gemini: ValueError: no JSON object in model reply; openai: RuntimeError: openai ), so I am asking you.",
+     "evidence": [],
+     "question": "Corner Clinic has an opening Monday at 9:30 AM. Take it?",
+     "source": "code",
+     "model": null,
+     "ms": null
+    },
+    {
+     "seq": 11,
+     "t_ms": 5324,
+     "type": "escalation",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "question": "Corner Clinic has an opening Monday at 9:30 AM. Take it?",
+     "lease_seconds": 10.0,
+     "delivery": {
+      "channel": "sms",
+      "simulated": true,
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Corner Clinic has an opening Monday at 9:30 AM. Take it? Reply Y to take it, N to pass.",
+      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
+     }
+    },
+    {
+     "seq": 12,
+     "t_ms": 11055,
+     "type": "lease_expired",
+     "actor": "desk",
+     "ticket": 41,
+     "offer_id": "offer-1",
+     "slot_id": "2026-10-12-0930",
+     "misses": 1,
+     "max_misses": 2,
+     "ticket_status": "waiting",
+     "position": 1
+    },
+    {
+     "seq": 13,
+     "t_ms": 11055,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 42",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 10.0
+    },
+    {
+     "seq": 14,
+     "t_ms": 11059,
+     "type": "deciding",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2"
+    },
+    {
+     "seq": 15,
+     "t_ms": 12875,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "escalate",
+     "reason": "The slot starts before 10 AM, and it is unclear whether your annual checkup counts as urgent.",
+     "evidence": [
+      "c1",
+      "e1",
+      "t1"
+     ],
+     "question": "Would you consider your Monday, October 12 appointment at 9:30 AM urgent enough to attend before 10 AM?",
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1813
+    },
+    {
+     "seq": 16,
+     "t_ms": 12875,
+     "type": "escalation",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "question": "Would you consider your Monday, October 12 appointment at 9:30 AM urgent enough to attend before 10 AM?",
+     "lease_seconds": 10.0,
+     "delivery": {
+      "channel": "sms",
+      "simulated": true,
+      "body": "Corner Clinic: Mon 9:30 AM opened up, held for 10 seconds. Would you consider your Monday, October 12 appointment at 9:30 AM urgent enough to attend before 10 AM? Reply Y to take it, N to pass.",
+      "note": "Simulated: no text was sent. Set DIAL_API_KEY, DIAL_FROM_NUMBER and DEMO_TO_NUMBER to send a real one."
+     }
+    },
+    {
+     "seq": 17,
+     "t_ms": 14811,
+     "type": "human_answer",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "answer": "no"
+    },
+    {
+     "seq": 18,
+     "t_ms": 14814,
+     "type": "decision",
+     "actor": "sitter:ana",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "decision": "pass",
+     "reason": "Ana answered no.",
+     "evidence": [],
+     "question": null,
+     "source": "human",
+     "model": null,
+     "ms": null
+    },
+    {
+     "seq": 19,
+     "t_ms": 14833,
+     "type": "passed",
+     "actor": "desk",
+     "ticket": 42,
+     "offer_id": "offer-2",
+     "slot_id": "2026-10-12-0930",
+     "reason_code": "declined",
+     "position": 2
+    },
+    {
+     "seq": 20,
+     "t_ms": 14834,
+     "type": "offer",
+     "actor": "desk",
+     "to": "ticket 43",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot": {
+      "slot_id": "2026-10-12-0930",
+      "start": "2026-10-12T09:30",
+      "minutes": 30,
+      "with": "Dr. Okafor",
+      "where": "Corner Clinic"
+     },
+     "lease_seconds": 10.0
+    },
+    {
+     "seq": 21,
+     "t_ms": 14846,
+     "type": "wire",
+     "actor": "sitter:ana",
+     "to": "desk",
+     "verb": "pass",
+     "ticket": 42,
+     "request": {
+      "offer_id": "offer-2",
+      "reason_code": "declined"
+     },
+     "status": 200,
+     "response": {
+      "status": "passed",
+      "position": 2,
+      "kept_place": true
+     }
+    },
+    {
+     "seq": 22,
+     "t_ms": 14848,
+     "type": "deciding",
+     "actor": "sitter:sam",
+     "ticket": 43,
+     "offer_id": "offer-3"
+    },
+    {
+     "seq": 23,
+     "t_ms": 15327,
+     "type": "escalation_unanswered",
+     "actor": "sitter:dev",
+     "ticket": 41,
+     "offer_id": "offer-1"
+    },
+    {
+     "seq": 24,
+     "t_ms": 16358,
+     "type": "decision",
+     "actor": "sitter:sam",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "decision": "accept",
+     "reason": "You are free at any time, have 90 minutes of travel time available, and have no later conflicts.",
+     "evidence": [
+      "c1",
+      "c2",
+      "e1",
+      "e2",
+      "e3"
+     ],
+     "question": null,
+     "source": "model",
+     "model": "gemini-3.8-flash",
+     "ms": 1506
+    },
+    {
+     "seq": 25,
+     "t_ms": 16365,
+     "type": "held",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930"
+    },
+    {
+     "seq": 26,
+     "t_ms": 16366,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "accept",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3"
+     },
+     "status": 200,
+     "response": {
+      "status": "held",
+      "offer_id": "offer-3",
+      "slot_id": "2026-10-12-0930"
+     }
+    },
+    {
+     "seq": 27,
+     "t_ms": 16369,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930",
+     "booking_id": "booking-1",
+     "replayed": false,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      42
+     ]
+    },
+    {
+     "seq": 28,
+     "t_ms": 16370,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3",
+      "idempotency_key": "sam-offer-3-ticket-43"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-0930",
+      "replayed": false
+     },
+     "attempt": 1,
+     "retry_on_purpose": false
+    },
+    {
+     "seq": 29,
+     "t_ms": 16776,
+     "type": "confirmed",
+     "actor": "desk",
+     "ticket": 43,
+     "offer_id": "offer-3",
+     "slot_id": "2026-10-12-0930",
+     "booking_id": "booking-1",
+     "replayed": true,
+     "bookings_for_slot": 1,
+     "waiting": [
+      41,
+      42
+     ]
+    },
+    {
+     "seq": 30,
+     "t_ms": 16777,
+     "type": "wire",
+     "actor": "sitter:sam",
+     "to": "desk",
+     "verb": "confirm",
+     "ticket": 43,
+     "request": {
+      "offer_id": "offer-3",
+      "idempotency_key": "sam-offer-3-ticket-43"
+     },
+     "status": 200,
+     "response": {
+      "status": "booked",
+      "booking_id": "booking-1",
+      "slot_id": "2026-10-12-0930",
+      "replayed": true
+     },
+     "attempt": 2,
+     "retry_on_purpose": true
+    }
+   ],
+   "answer": {
+    "backend": "jsonl",
+    "simulated_keewano": true,
+    "events_read": 30,
+    "served": {
+     "ticket": 43,
+     "wait_s": 16.3,
+     "answer": "Ticket 43 waited 16.3 s in line, from taking the ticket (event 4) to the booking (event 27). The slot came free at event 7 and was booked 15.4 s later. Its own offer took 1.5 s from offer (event 20) to booking.",
+     "evidence_seq": [
+      4,
+      7,
+      20,
+      27
+     ]
+    },
+    "passed": {
+     "ticket": 42,
+     "answer": "Ticket 42 passed because: Ana answered no. (event 18, decided by human). It kept its place (position 2). Ticket 41 did not answer before its lease ran out (event 12); miss 1 of 2.",
+     "evidence_seq": [
+      18,
+      19,
+      12
+     ]
+    }
+   }
+  }
+ ]
+}

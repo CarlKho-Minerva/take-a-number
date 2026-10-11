@@ -20,7 +20,9 @@ ALLOWED = (
     "DIAL_FROM_NUMBER",
     "DEMO_TO_NUMBER",
     "DARWIN_API_KEY",
-    "KEEWANO_URL",
+    "DIAL_WEBHOOK_SECRET",
+    "TAN_BASE_URL",
+    "TAN_PUBLIC_URL",
 )
 
 
