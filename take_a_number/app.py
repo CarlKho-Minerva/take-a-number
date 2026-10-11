@@ -353,6 +353,12 @@ async def darwin_listing(request: Request) -> dict[str, Any]:
     return {"status": darwin.status(), "listing": darwin.listing(w.desk.agent_card(), public), "commands": darwin.commands()}
 
 
+@app.get("/demo/darwin/search")
+async def darwin_search() -> dict[str, Any]:
+    """One real, read-only search of Darwin's directory: is there a line like this to find?"""
+    return await darwin.search()
+
+
 # ---- Dial inbound --------------------------------------------------------
 
 

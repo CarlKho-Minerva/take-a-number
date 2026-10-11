@@ -321,8 +321,14 @@ class LineSitter:
         if offer.get("ticket") != self.ticket:
             self.transcript.emit("agent_error", self.actor, message="offer was addressed to a ticket I do not hold; ignored")
             return
+        # Answers only ever go to the desk this sitter took its ticket from. An offer that
+        # names some other address to reply to is ignored, so a forged offer cannot be used
+        # to collect the ticket secret.
+        reply_to = (offer.get("reply_to") or "").rstrip("/")
+        if not self.desk_url or (reply_to and reply_to != self.desk_url):
+            self.transcript.emit("agent_error", self.actor, message="offer asked for a reply to a desk I hold no ticket with; ignored")
+            return
         slot, offer_id = offer["slot"], offer["offer_id"]
-        self.desk_url = (offer.get("reply_to") or self.desk_url or "").rstrip("/")
         self.transcript.emit("deciding", self.actor, ticket=self.ticket, offer_id=offer_id)
         decision = await self.decide(slot)
         self.transcript.emit("decision", self.actor, ticket=self.ticket, offer_id=offer_id, **decision.public())

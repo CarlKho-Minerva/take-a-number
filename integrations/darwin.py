@@ -25,12 +25,13 @@ import httpx
 
 API_V1 = "https://api.darwin.so/api/v1"
 SEARCH_V3 = "https://api.darwin.so/api/v3/search"
+SEARCH_V2 = "https://api.darwin.so/api/v2/search"
 
 
 def status() -> dict[str, Any]:
     has_key = bool(os.environ.get("DARWIN_API_KEY"))
-    return {"tool": "Darwin", "simulated": True, "listed": False, "has_key": has_key,
-            "note": "Listing file and commands are generated; nothing is submitted by this code."}
+    return {"tool": "Darwin", "simulated": True, "listed": False, "has_key": has_key, "search": "real call, no key needed",
+            "note": "Search is a real call. The listing file and commands are generated; nothing is submitted by this code."}
 
 
 def listing(card: dict[str, Any], public_url: str) -> dict[str, Any]:
@@ -76,16 +77,34 @@ def commands(path: str = "integrations/darwin_listing.json") -> list[str]:
     ]
 
 
-async def search(query: str, max_results: int = 5) -> dict[str, Any]:
-    """Ask Darwin who can do something. Works without a key. Read-only."""
+SEARCH_QUERY = "take a ticket and hold a place in line for a cancelled clinic appointment"
+
+
+async def search(query: str = SEARCH_QUERY, max_results: int = 5) -> dict[str, Any]:
+    """Ask Darwin who can do something. A real call; works without a key. Read-only.
+
+    Tries the v3 endpoint from Darwin's quickstart, then the v2 endpoint from
+    its OpenAPI file if v3 errors. Reports which one answered.
+    """
     headers = {"x-api-key": os.environ["DARWIN_API_KEY"]} if os.environ.get("DARWIN_API_KEY") else {}
+    out: dict[str, Any] = {"tool": "Darwin", "simulated": False, "query": query}
+    attempts = (
+        ("v3", SEARCH_V3, {"query": query[:2000], "maxResults": max_results}),
+        ("v2", SEARCH_V2, {"query": query[:2000], "numResults": max_results}),
+    )
+    errors = []
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            r = await client.post(SEARCH_V3, json={"query": query[:2000], "maxResults": max_results}, headers=headers)
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            for name, url, body in attempts:
+                r = await client.post(url, json=body, headers=headers)
+                if r.status_code != 200:
+                    errors.append(f"{name}: http {r.status_code}")
+                    continue
+                data = r.json()
+                agents = (data.get("response") or {}).get("agents") or data.get("agents") or []
+                names = [str(a.get("name") or a.get("agentSlug") or a.get("agentId") or a.get("agent") or "")[:60] for a in agents]
+                return out | {"ok": True, "endpoint": name, "count": len(agents), "agents": names[:max_results],
+                              "outcome": data.get("outcome") or data.get("status")}
     except httpx.HTTPError as exc:
-        return {"ok": False, "error": type(exc).__name__}
-    if r.status_code != 200:
-        return {"ok": False, "error": f"http {r.status_code}"}
-    body = r.json()
-    agents = (body.get("response") or {}).get("agents") or body.get("agents") or []
-    return {"ok": True, "count": len(agents), "agents": agents, "status": body.get("status")}
+        errors.append(type(exc).__name__)
+    return out | {"ok": False, "error": "; ".join(errors)}

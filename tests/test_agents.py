@@ -150,6 +150,18 @@ async def test_wrong_ticket_secret_is_refused(make_world):
         assert r.status_code == 403 and r.json()["error"] == "not_your_offer"
 
 
+async def test_forged_offer_naming_another_desk_is_ignored_and_leaks_nothing(make_world):
+    world, factory = await make_world()
+    async with factory() as client:
+        r = await client.post("/sitters/dev/a2a/offer", json={
+            "offer_id": "offer-evil", "ticket": 41, "lease_seconds": 60, "reply_to": "http://evil.example/desk",
+            "slot": {"slot_id": "x", "start": "2026-10-12T15:00", "minutes": 30}})
+    assert r.status_code == 200
+    errors = await until(world, "agent_error")
+    assert "ignored" in errors[0]["message"]
+    assert "deciding" not in types(world) and world.sitters["dev"].desk_url == "http://test/desk"
+
+
 # ---- failure paths -------------------------------------------------------
 
 

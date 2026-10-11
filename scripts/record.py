@@ -62,9 +62,11 @@ def main() -> None:
         if not health.get("model_providers"):
             raise SystemExit("no model key is set on the server; a recording must come from real model calls")
         runs = [record(client, spec) for spec in RUNS]
+        darwin_search = client.get(f"{BASE}/demo/darwin/search").json()
     OUT.write_text(json.dumps({
         "recorded_at": time.strftime("%Y-%m-%d %H:%M %Z"),
         "note": "Real LIVE runs: real HTTP between the agents on one machine, real model calls. Saved by scripts/record.py, not edited.",
+        "darwin_search": darwin_search,
         "runs": runs,
     }, indent=1) + "\n")
     print(f"wrote {OUT}")

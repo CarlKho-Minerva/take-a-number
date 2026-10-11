@@ -324,8 +324,16 @@
     const dial = i.dial.simulated ? ['off', 'simulated, no text sent'] : ['', 'live, real texts'];
     $('partners').innerHTML = `
       <div><h3>Dial</h3><span class="st ${dial[0]}">${dial[1]}</span><p class="note">When an agent must ask its person, it texts the one yes or no question. ${i.dial.simulated ? 'Needs ' + esc(i.dial.missing.join(', ')) + '.' : ''}</p></div>
-      <div><h3>Darwin</h3><span class="st off">listing built, not submitted</span><p class="note">The front desk's agent card is turned into a Darwin listing file, so a person's agent could find this line. Submitting it is left to a human.</p></div>
+      <div><h3>Darwin</h3><span class="st ${ui.darwin?.ok ? '' : 'off'}">${ui.darwin?.ok ? 'search is a real call' : 'search not reached'}, listing not submitted</span><p class="note">${darwinLine()} The front desk's agent card is also turned into a Darwin listing file, so a person's agent could find this line. Submitting it is left to a human.</p></div>
       <div><h3>Keewano</h3><span class="st off">simulated with a JSONL log</span><p class="note">Every event is appended to a log, and the question above is answered from the full sequence. KeewanoDB Local had no public install on build day.</p></div>`;
+  }
+
+  function darwinLine() {
+    const d = ui.darwin;
+    if (!d) return 'Darwin search has not been asked yet.';
+    if (!d.ok) return `Darwin search failed (${esc(d.error || 'no reply')}).`;
+    const found = d.count ? `${d.count} agent${d.count === 1 ? '' : 's'} came back, none of them a line you can join` : 'nothing came back';
+    return `${ui.mode === 'replay' ? 'Recorded: asked' : 'Asked'} Darwin's directory for &ldquo;${esc(d.query)}&rdquo;: ${found}${d.outcome ? ` (${esc(d.outcome)})` : ''}.`;
   }
 
   function render() {
@@ -471,6 +479,7 @@
       try { ui.replay = await (await fetch('replay.json', { cache: 'no-store' })).json(); }
       catch (err) { ui.error = 'Could not read replay.json: ' + err.message; S = blank(); render(); return; }
     }
+    ui.darwin = ui.replay.darwin_search || null;
     showRunStart(ui.replay.runs[0].id);
     if (params.has('autoplay')) playRun(params.get('autoplay') || ui.replay.runs[0].id);
   }
@@ -497,6 +506,10 @@
     if (!ok) { render(); return; }
     ui.lastSeq = 0;
     const run = ui.run;
+    if (!ui.darwinAsked) { // one real search per page load
+      ui.darwinAsked = true;
+      fetch('demo/darwin/search').then((r) => r.json()).then((d) => { ui.darwin = d; renderPartners(); }).catch(() => { ui.darwin = { ok: false, error: 'not reachable' }; renderPartners(); });
+    }
     let failures = 0;
     const tick = async () => {
       if (run !== ui.run || ui.busy) return;

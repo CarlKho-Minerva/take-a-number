@@ -57,7 +57,7 @@ a:hover { color: var(--glow); }
 .btn:disabled { opacity: .55; cursor: default; }
 .btn--ghost { background: transparent; color: var(--paper); border-color: var(--line-control); }
 .btn--ghost:hover:not(:disabled) { border-color: var(--paper); }
-.btn--ghost[aria-pressed="true"] { border-color: var(--glow); color: var(--glow); }
+.btn[aria-pressed="true"], .btn[aria-pressed="true"]:disabled { background: transparent; border-color: var(--glow); color: var(--glow); opacity: 1; }
 .field {
   font: 400 13px/1 var(--mono); min-height: 44px; padding: 0 12px; flex: 1 1 260px; min-width: 0;
   background: transparent; color: var(--paper); border: 1px solid var(--line-control);
