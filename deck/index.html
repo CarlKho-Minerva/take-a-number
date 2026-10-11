@@ -1121,9 +1121,9 @@ const pad=n=>String(n).padStart(2,'0');
 /* ---- the partner slide reads from this table. Keep it true to the code: integrations/*.py ---- */
 /* mark: 'real' = a filled square, 'part' = a half-built square, 'none' = a ring */
 const PARTNERS=[
-  {name:'Dial',what:'texts the person one yes or no question',mark:'part',status:'coded to their API, simulated here'},
+  {name:'Dial',what:'texts the person one yes or no question',mark:'part',status:'simulated, no text sent'},
   {name:'Darwin',what:'lists the front desk where agents search',mark:'part',status:'listing built, not submitted'},
-  {name:'Keewano',what:'answers how long, and why, from the events',mark:'part',status:'seam cut, JSONL behind it'},
+  {name:'Keewano',what:'answers how long, and why, from the events',mark:'part',status:'simulated with a JSONL log'},
   {name:'Alike, Sparta',what:'',mark:'none',status:'not used'}
 ];
 
@@ -1319,7 +1319,7 @@ BEATS.push({id:'partners',name:'Partner tools',dur:9500,build(b){
   const g=canvas(b);
   const w1=words(tx(b,'t h','Partner tools, as wired today.',160,170));
   const rows=PARTNERS.map((p,k)=>{const y=380+k*112;return [tx(b,'t m',p.name,220,y),tx(b,'i',p.what,720,y+16),tx(b,'px '+(p.mark==='real'?'glow':p.mark==='part'?'warn':'mute'),p.status,1380,y+22),y,p]});
-  const foot=tx(b,'i p','Each one says "simulated" on the page until its key is set.',160,890,{fontSize:'32px'});
+  const foot=tx(b,'i p','None is live yet. The page says so next to each one.',160,890,{fontSize:'32px'});
   return {seek(ms){riseWords(w1,ms,300,80,450);g.clearRect(0,0,1920,1080);
     rows.forEach(([n,w,s,y,p],k)=>{const a=1600+k*1300;const q=eo(seg(ms,a,500));n.style.opacity=q.toFixed(3);n.style.transform=`translateX(${lerp(-40,0,q).toFixed(1)}px)`;fade(w,ms,a+250,500);fade(s,ms,a+600,500);
       if(q<=0)return;const mx=164,my=y+18;
@@ -1335,9 +1335,9 @@ BEATS.push({id:'ask',name:'The ask',dur:9000,build(b){
   const w1=words(tx(b,'t h','Point your agent',160,170)),w2=words(tx(b,'t h','at a front desk.',160,270));
   const REQ='POST /desk/a2a/take_ticket';
   const req=tx(b,'code glow','',160,500,{fontSize:'44px'});
-  const res=tx(b,'code','{ "ticket": 44, "position": 4, "lease_seconds": 60 }',160,580,{fontSize:'32px',color:'#a8b4c8'});
+  const res=tx(b,'code','{ "ticket": 44, "position": 4, "ticket_secret": "...", "lease_seconds": 60.0 }',160,580,{fontSize:'32px',color:'#a8b4c8'});
   const a1=tx(b,'i p','It waits, so you do not.',160,720,{fontSize:'44px'});
-  const a2=tx(b,'i','The ask: tell us which line to open next, and send your agent to stand in it.',160,800,{fontSize:'32px'});
+  const a2=tx(b,'i','The ask: name the line you want opened next, and send your agent to stand in it.',160,800,{fontSize:'32px'});
   const m=tx(b,'mn','github.com/CarlKho-Minerva/take-a-number',160,900);
   return {seek(ms){riseWords(w1,ms,300,80,450);riseWords(w2,ms,900,80,450);
     const n=Math.round(REQ.length*seg(ms,2000,1500));req.textContent=REQ.slice(0,n)+(n<REQ.length&&ms>=2000?'_':'');req.style.opacity=ms>=2000?'1':'0';
@@ -1354,8 +1354,8 @@ lease:['<b>The backend idea, named once.</b> A queue with leases and visibility 
 agents:['<b>Line Sitter.</b> One per person. The model may only use listed facts and must cite their ids; plain code checks every cited id and computes calendar overlaps itself. If the model is down the sitter never accepts on its own.','<b>Front Desk.</b> One per service. The model does one job there: turn a free-text cancellation into name, date, time. Matching against the schedule is plain code and must hit exactly one appointment, or it goes to staff.','<b>Privacy.</b> The reason sentence stays on the person\'s side. The desk gets pass plus a code such as schedule_conflict or declined.'],
 run:['<b>This is the demo.</b> Corner Clinic and its people are made up. Maria cancels 3:00 PM tomorrow. Ticket 41 (Dev) is presenting at a review that overlaps, so it passes and keeps its place. Ticket 42 (Ana) accepts and confirms. Ticket 43 (Sam) is still in line.','<b>What is real in it.</b> Real HTTP between the agents on one machine, real model calls, the real line code. Timings are in the page\'s log; read them off the screen, do not quote from memory.'],
 once:['<b>Idempotent confirm.</b> The demo sends confirm twice on purpose with the same key, 0.4 s apart. The second reply says replayed: true and returns the same booking id. The page counts bookings for the slot: 1.','<b>Tests.</b> The line rules have 25 unit tests with a clock that is moved by hand (count on 2026-10-11; rerun pytest before quoting it).'],
-partners:['<b>Say it straight.</b> Dial: the code speaks their documented send and webhook shapes; a real text goes out only when the key, a from number and a demo number are all set, otherwise the page says simulated. Darwin: the listing JSON and the two curl commands are generated; nothing is submitted. Keewano: the event log sits behind one small interface with a JSONL file today; KeewanoDB Local had no public install on 2026-10-11. Alike and Sparta: not used.','<b>If a key is set before the demo,</b> change the PARTNERS table at the top of deck/src.html and rebuild, so this slide never claims more than the page shows.'],
-ask:['<b>The ask.</b> One sentence: tell us which line to open next, and point your agent at it. One POST takes a ticket.','<b>If asked what is next.</b> A second front desk that is not a clinic, a real Dial number, and a public Darwin listing so other agents can find the line.']
+partners:['<b>Say it straight.</b> None of the three is live today (checked against /demo/health on 2026-10-11). Dial: the code speaks their documented send and webhook shapes; a real text goes out only when the key, a from number and a demo number are all set, otherwise the page says simulated. Darwin: the listing JSON and the two curl commands are generated; nothing is submitted. Keewano: the event log sits behind one small interface with a JSONL file today; KeewanoDB Local had no public install on 2026-10-11. Alike and Sparta: not used.','<b>If a key is set before the demo,</b> change the PARTNERS table at the top of deck/src.html and rebuild, so this slide never claims more than the page shows.'],
+ask:['<b>The ask.</b> One sentence: name the line you want opened next, and point your agent at it. One POST takes a ticket. The reply on the slide is the real shape: a fourth agent in the demo gets ticket 44 at position 4.','<b>If asked what is next.</b> A second front desk that is not a clinic, a real Dial number, and a public Darwin listing so other agents can find the line.']
 };
 
 /* ============ engine ============ */
