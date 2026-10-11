@@ -119,7 +119,8 @@ p { margin: 0 0 8px; }
 .ticket.offered { border-color: var(--glow); }
 .ticket.booked { border-color: var(--paper); }
 .ticket.gone { border-style: dashed; }
-.ticket-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; border-bottom: 1px dashed var(--line-control); padding-bottom: 12px; }
+.ticket-top { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px dashed var(--line-control); padding-bottom: 12px; }
+.ticket-top .st { white-space: normal; }
 .numeral { font: 400 clamp(2rem, 5vw, 3.6rem)/1 var(--circle); color: var(--paper); letter-spacing: .01em; }
 .who { font: 600 14px/1.3 var(--inter); color: var(--paper); }
 .ticket ul { margin: 0; padding: 0; list-style: none; font: 400 13px/1.45 var(--inter); }

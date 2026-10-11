@@ -238,8 +238,8 @@
       const reason = p.reason ? `<div><div class="reason">${esc(p.reason)}</div><span class="meta">decided by ${esc(p.source)}${p.evidence?.length ? `, citing ${esc(p.evidence.join(', '))}` : ''}${p.ms ? `, ${p.ms} ms` : ''}</span></div>` : '';
       return `<article class="ticket ${frame}" aria-label="Ticket ${p.ticket ?? ''} held by ${esc(p.name)}'s agent">
         <div class="ticket-top"><span class="numeral">${p.ticket ?? '..'}</span><span class="st ${cls}">${esc(word(p))}</span></div>
-        <div><div class="who">${esc(p.name)}'s agent</div><span class="meta">${esc(p.visit_reason)}, now booked ${dayName(p.current_appointment)}</span></div>
-        ${leaseDots(p)}${reason}${ask}
+        <div><div class="who">${esc(p.name)}'s agent</div><span class="meta">${esc(p.visit_reason)}. Holds ${dayName(p.current_appointment)}.</span></div>
+        ${leaseDots(p)}${ask}${reason}
         <div><span class="eyebrow">In ${esc(p.name)}'s words</span><ul>${p.constraints.map((c, i) => `<li><span class="meta">c${i + 1}</span> ${esc(c)}</li>`).join('')}</ul></div>
         <div><span class="eyebrow">Calendar, ${tomorrow ? dayName(tomorrow) : ''}</span><ul>${cal || '<li class="cal">nothing</li>'}</ul></div>
       </article>`;
@@ -515,6 +515,11 @@
     };
     await tick();
     ui.poll = setInterval(tick, 250);
+    if (params.has('go') && !ui.went) { // ?mode=live&go=0 presses the first cancellation by itself (used for checks)
+      ui.went = true;
+      const preset = ui.health?.presets?.[Number(params.get('go')) || 0];
+      if (preset) post('demo/cancel', { text: preset.text });
+    }
   }
 
   async function boot() {

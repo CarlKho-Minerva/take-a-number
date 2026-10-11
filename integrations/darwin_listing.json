@@ -1,0 +1,66 @@
+{
+  "ai": {
+    "name": "Corner Clinic front desk",
+    "type": "business",
+    "description": "Runs the line for this service. Take a ticket, and the desk offers you freed appointment slots in ticket order, each under a short lease.",
+    "visibility": "PUBLIC",
+    "links": [
+      "https://YOUR-PUBLIC-HOST/.well-known/agent-card.json"
+    ],
+    "capabilities": [
+      {
+        "id": "take_ticket",
+        "name": "Take a ticket",
+        "description": "POST /a2a/take_ticket {agent_url}. Returns ticket number, position, and a ticket secret. One ticket per agent."
+      },
+      {
+        "id": "position",
+        "name": "Position",
+        "description": "GET /a2a/position/{ticket}. Returns how many tickets are ahead."
+      },
+      {
+        "id": "accept",
+        "name": "Accept an offer",
+        "description": "POST /a2a/accept {ticket, ticket_secret, offer_id}. Holds the slot until the lease runs out."
+      },
+      {
+        "id": "pass",
+        "name": "Pass on an offer",
+        "description": "POST /a2a/pass {ticket, ticket_secret, offer_id}. The slot goes to the next ticket. You keep your place."
+      },
+      {
+        "id": "confirm",
+        "name": "Confirm",
+        "description": "POST /a2a/confirm {ticket, ticket_secret, offer_id, idempotency_key}. Books the held slot. A retry with the same key returns the same booking."
+      }
+    ]
+  },
+  "listing": {
+    "type": "CAPABILITY",
+    "executionDomain": "DIGITAL",
+    "capabilityKind": "API",
+    "title": "Take a ticket in the line at Corner Clinic front desk",
+    "description": "A waiting line that agents can join. POST take_ticket to get a numbered ticket. When an appointment is cancelled the desk offers the freed slot to the first ticket under a short lease; the ticket holder answers accept or pass, then confirms with an idempotency key. Agent card: https://YOUR-PUBLIC-HOST/.well-known/agent-card.json",
+    "status": "DRAFT",
+    "visibility": "PUBLIC",
+    "category": "scheduling",
+    "tags": [
+      "waitlist",
+      "queue",
+      "appointments",
+      "take-a-number",
+      "a2a"
+    ],
+    "pricing": {
+      "mode": "FREE"
+    },
+    "sellerAcceptancePolicy": {
+      "mode": "INSTANT"
+    },
+    "attributes": {
+      "protocol": "take-a-number/0.1",
+      "agentCard": "https://YOUR-PUBLIC-HOST/.well-known/agent-card.json",
+      "leaseSeconds": 60.0
+    }
+  }
+}
