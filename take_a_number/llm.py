@@ -23,6 +23,7 @@ import httpx
 from . import config
 
 TIMEOUT_S = 8.0  # per provider attempt
+FORCE_UNAVAILABLE = False  # the demo's "model outage" switch; always labelled on the page
 
 
 class LLMUnavailable(Exception):
@@ -137,6 +138,8 @@ _CALLS = {"gemini": _gemini, "openai": _openai, "azure": _azure}
 
 async def complete_json(system: str, user: str, timeout_s: float = TIMEOUT_S) -> LLMResult:
     """Ask for a JSON object. Tries each provider that has a key, once."""
+    if FORCE_UNAVAILABLE:
+        raise LLMUnavailable("model outage simulated by the demo switch")
     errors: list[str] = []
     names = providers()
     if not names:
