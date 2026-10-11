@@ -243,4 +243,4 @@ Alike and Sparta were not used.
 
 ## Built at
 
-SpeedHacks (a16z speedrun), San Francisco, 2026-10-11. Theme: give people their time back. Everything in this repository was written that day; the commit history is the record. Fonts in `docs/fonts/` are Geist Pixel, Inter and JetBrains Mono under the SIL Open Font License, with license texts alongside.
+SpeedHacks (a16z speedrun), San Francisco, 2026-10-11. Theme: give people their time back. The project itself (`take_a_number/`, `integrations/`, `docs/`, `tests/`, `scripts/`) was written that day, and the commit history is the record. One exception, stated plainly: the pitch deck in `deck/` is styled with Carl's own design kit, a stylesheet and a canvas script he wrote before the event. No project code uses it. Fonts in `docs/fonts/` are Geist Pixel, Inter and JetBrains Mono under the SIL Open Font License, with license texts alongside.
