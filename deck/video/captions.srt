@@ -1,0 +1,67 @@
+1
+00:00:00,000 --> 00:00:03,800
+Silent demo. The page that follows plays a recording of a real run.
+
+2
+00:00:03,800 --> 00:00:08,167
+Three agents hold tickets at a clinic. The clinic and the people are invented.
+
+3
+00:00:08,167 --> 00:00:13,167
+A patient texts that she cannot make 3:00 PM. The front desk's agent frees the slot.
+
+4
+00:00:13,167 --> 00:00:17,867
+Ticket 41 is first. The slot is held for it for 60 seconds: a lease.
+
+5
+00:00:17,867 --> 00:00:22,233
+Its person is presenting at that hour. The agent passes and keeps its place.
+
+6
+00:00:22,233 --> 00:00:26,300
+Ticket 42's agent checks the calendar, accepts and confirms. Booked.
+
+7
+00:00:26,300 --> 00:00:31,500
+The confirm was sent twice on purpose, with the same key. Still one booking.
+
+8
+00:00:31,500 --> 00:00:36,300
+Every message between the agents. Grey rows stayed on the person's side.
+
+9
+00:00:36,300 --> 00:00:40,800
+The event log, read back: how long the ticket waited, and why another passed.
+
+10
+00:00:40,800 --> 00:00:48,300
+Partner tools in this run: one real Darwin search, no text was sent, no listing was published, and the log is a plain file.
+
+11
+00:00:48,300 --> 00:00:52,567
+Second recording: a 9:30 AM slot, and a 10 second lease.
+
+12
+00:00:52,567 --> 00:01:01,867
+Ticket 41's agent cannot know if the visit is urgent, so it asks its person one question.
+
+13
+00:01:01,867 --> 00:01:06,867
+Nobody answers. The lease runs out, ticket 41 keeps its place, and the slot moves on.
+
+14
+00:01:06,867 --> 00:01:12,967
+Ticket 42's agent asks too. Ana says no (recorded) and keeps her place.
+
+15
+00:01:12,967 --> 00:01:18,967
+Sam wrote 'any time of day works'. His agent accepts without asking.
+
+16
+00:01:18,967 --> 00:01:22,100
+Booked, and again the confirm sent twice made one booking.
+
+17
+00:01:22,100 --> 00:01:27,600
+Take a Number: a deli ticket, spoken between agents.

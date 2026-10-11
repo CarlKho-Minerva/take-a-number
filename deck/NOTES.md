@@ -10,6 +10,7 @@ One HTML file, one 1920x1080 stage, one clock. Ten slides, four beats. Every num
 | `deck/take-a-number.pdf` | The same ten slides at their last frame, one per page, 1920x1080 |
 | `deck/src.html` | The source. Edit this, then run `deck/build.sh` |
 | `deck/build.sh`, `deck/shoot.py` | Lint, inline, screenshot every slide into `deck/shots/`, print the PDF. Exits non-zero on any page error |
+| `deck/video/take-a-number-demo.mp4`, `deck/video/captions.srt` | The silent captioned demo video and its captions. Made by `deck/video/render.py` (see "Video" below) |
 
 ## Keys
 
@@ -71,14 +72,14 @@ The twelve squares and which ones empty first are a drawing, not data. Do not ad
 | How often expired leases are swept | every 0.25 s | `take_a_number/app.py` `_sweep_forever` |
 | Model timeout | 8 s per provider, up to three providers | `take_a_number/llm.py` |
 | Gap between the two confirms | 0.4 s, same idempotency key | `take_a_number/line_sitter.py` |
-| Maria run, message to booking | Median 4.7 s over 7 live runs (3.6 to 5.5 s). The shipped recording shows 3.8 s; a live run differs, read it off the page | README "Latency", `scripts/latency.py`; `docs/replay.json` run `maria-3pm`, events 5 and 18 |
+| Maria run, message to booking | Median 4.7 s over 7 live runs (3.6 to 5.5 s). A recording made that morning showed 3.8 s; the recording has been remade since and a live run differs, so read it off the page | README "Latency", `scripts/latency.py`; `docs/replay.json` run `maria-3pm`, events 5 and 18 |
 | One offer round | Median 1.5 s (1.1 to 1.9 s), of which the model call is 1.49 s and the protocol (two HTTP hops and the queue) 16 ms | README "Latency" |
 | Model calls in that run | 3 (one at the desk, one per sitter that decided), each a little over 1 s, gemini-3.8-flash | `docs/replay.json` |
 | Ticket 44, position 4 on slide 10 | The real reply a fourth agent gets after a reset | checked with curl against a local copy on 2026-10-11 |
-| Tests | 49 pass with no network (25 on the queue alone), checked 2026-10-11. Run `uv run pytest -q` again before quoting | `tests/` |
+| Tests | 55 pass with no network at 11:01 PDT on 2026-10-11. The count rose all morning; run `uv run pytest -q` again before quoting | `tests/` |
 | "8.1 minutes per scheduling call" on the page | An assumption the page labels as one (Accenture, 2013). Do not quote it as a result | `docs/app.js` |
 
-If `docs/replay.json` is recorded again, the 3.8 s will change. Read the new number from the page before saying one.
+`docs/replay.json` was recorded several times on build day and its numbers change each time. Read the number from the page before saying one.
 
 ## Partner slide: keep it true
 
@@ -92,6 +93,30 @@ Slide 9 reads from the `PARTNERS` table at the top of the script in `deck/src.ht
 | Alike, Sparta | Not used | No |
 
 If Dial goes live before the demo, change its row to `mark:'real'` and `status:'live, real texts'`, run `deck/build.sh`, and look at `deck/shots/09_end.png` before presenting.
+
+## Video
+
+`deck/video/take-a-number-demo.mp4`: silent, captions burned in, 1920x1080, 30 fps, H.264, 87.6 seconds, 5.4 MB. `deck/video/captions.srt` holds the same 17 captions with their timings.
+
+What it shows, in order:
+
+1. The deck's title slide (4 s).
+2. The demo page in Replay, playing the recording **Maria cancels 3:00 PM**: ticket 41 passes, ticket 42 books, the confirm is sent twice.
+3. The **On the wire** table, then **Asked of the event log** and **Partner tools in this run**.
+4. The recording **Nobody answers: the lease runs out**: ticket 41's agent asks its person, the 10 second lease drains, Ana says no, Sam's agent books.
+5. The deck's ask slide (5.5 s).
+
+How it was made: `deck/video/render.py` serves `docs/` from a throwaway local server with no agents behind it, so the page can only play `docs/replay.json` (the recording made at 11:01 PDT on 2026-10-11). The script steps the page's clock one video frame at a time and takes a screenshot. Where a caption needs longer to read than the step stays on screen, the last frame is repeated, 8.8 seconds in total, so the video runs slower than the recorded run. Every number on the page is the recording's own. The partner caption is built from what the recording reports, not typed by hand.
+
+What it does not show: a live run, a real text message, a published Darwin listing, or anything stored in Keewano. The corner tag reads "REPLAY OF A RECORDED RUN" for every second the page is on screen.
+
+Rebuild (about 6 minutes; `--fps 5` writes a one-minute-to-render preview into `deck/video/_work/`):
+
+```bash
+/path/to/venv/bin/python deck/video/render.py
+```
+
+The script stops with a non-zero exit if the page is not in Replay, if a run does not end in a booking, or if the page shows a headline no caption was written for.
 
 ## Rebuild
 

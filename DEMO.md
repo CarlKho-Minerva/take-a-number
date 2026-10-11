@@ -92,7 +92,7 @@ No. A booking app owns both sides. This is the wire between two agents that have
 It does two jobs. At the desk it turns a free-text cancellation into a name, a date and a time; plain code then has to match exactly one appointment, or the message goes to staff. For the person it judges an offer against their written rules, and it must cite the facts it used; code checks every citation and computes calendar overlaps itself, so a model cannot accept over a conflict. If the model is down the agent never accepts on its own: a hard overlap becomes a pass, anything else becomes a question for the person. There is a `sitter model outage (simulated)` checkbox on the page to show the person's side of it.
 
 **"What is real and what is simulated?"**
-Real: the line rules (49 tests, with a clock moved by hand), HTTP between the agents on one machine, the model calls, the idempotent confirm, and one keyless search call to Darwin. Invented: the clinic, the schedule, the three people. Simulated today: the text to the person (the Dial adapter is written to their documented API, has never sent a real text, and sends only when a key and two numbers are set) and Keewano (the event log is a JSONL file behind one small interface). Not done: the Darwin listing is generated but not published. Not built: identity. A ticket is tied to an agent URL and a ticket secret, and nothing proves who is behind the URL.
+Real: the line rules (tested with a clock moved by hand; `uv run pytest -q` prints today's count), HTTP between the agents on one machine, the model calls, the idempotent confirm, and one keyless search call to Darwin. Invented: the clinic, the schedule, the three people. Simulated today: the text to the person (the Dial adapter is written to their documented API, has never sent a real text, and sends only when a key and two numbers are set) and Keewano (the event log is a JSONL file behind one small interface). Not done: the Darwin listing is generated but not published. Not built: identity. A ticket is tied to an agent URL and a ticket secret, and nothing proves who is behind the URL.
 
 ## For the technical judge
 
@@ -103,7 +103,7 @@ curl -s -X POST localhost:8041/desk/a2a/take_ticket -H 'Content-Type: applicatio
   -d '{"agent_url":"http://127.0.0.1:9999/me","label":"judge"}'  # your own ticket: number, position, ticket_secret, lease_seconds
 curl -s localhost:8041/demo/line                                # the whole line: tickets, slots, offers, bookings
 curl -s localhost:8041/demo/darwin/search                       # one real, keyless search of Darwin's directory
-uv run pytest -q                                                # 49 tests, no network; the line rules use a clock moved by hand
+uv run pytest -q                                                # the tests, no network; the line rules use a clock moved by hand
 ```
 
 A ticket taken with curl has no agent listening at its URL. When a slot reaches it the desk reports `could not reach ticket N's agent`, counts a miss, and moves on. That is the designed behaviour.
